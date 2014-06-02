@@ -7,6 +7,5 @@ function timelabel = MakeTimeLabelsCrossSpectraEpochs(nrEpochs)
     for t = 2:nrEpochs
         timelabel(t) = timelabel(t-1) + epochSizeSeconds/3600;
     end
-
 end
 

@@ -8,7 +8,7 @@ function PlotPowerSpectra(patientnr, nightnr, channelStr)
     filename = ['power_spectra_p' int2str(patientnr) '_overnight' int2str(nightnr) '_1'];
     
     % load freq struct
-    load([powspecFolder filename '.mat']);
+    load([folderPowspec filename '.mat']);
     
     % find channel index
     channelnr = find(ismember(freqStruct.label,channelStr));
@@ -26,6 +26,5 @@ function PlotPowerSpectra(patientnr, nightnr, channelStr)
     colorbar
     set(gca,'FontSize',20)
     set(gca,'YDir','normal');
-    
     
 end

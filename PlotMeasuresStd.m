@@ -16,8 +16,8 @@ function PlotMeasuresStd(patientnr, nightnrs, aux, measureNames)
         for f = 1:length(aux)
              % load measures & info
             patientName = ['p' int2str(patientnr) '_overnight' int2str(nightnrs(n)) '_' aux{f}];
-            load([measuresFolder 'measures_' patientName]);
-            load([measuresFolder 'info_' patientName]);
+            load([folderMeasures 'measures_' patientName]);
+            load([folderMeasures 'info_' patientName]);
 
             nrEpochs = length(measures);
 

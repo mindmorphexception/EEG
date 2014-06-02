@@ -15,10 +15,7 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, vara
 %     end
 
 
-    % input/output
-    wpliFolder = 'F:\Overnight\wpli1\';
-    matrixFolder = 'F:\Overnight\matrix1\';
-    crsspctrPrefix = 'F:\Overnight\cross spectra1\cross_spectra1_';
+    LoadFolderNames;
     
 %     try
 %     matlabpool close
@@ -41,7 +38,7 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, vara
     % if the struct is empty, load it from file
     if(isempty(freqStruct))
         fprintf('Loading freqStruct...');
-        load([crsspctrPrefix basename],'freqStruct');
+        load([folderCrossSpectra 'cross_spectra_' basename],'freqStruct');
         fprintf('Done.\n');
     end
     
@@ -106,7 +103,7 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, vara
     for freqIndex = 1:nr_freq
         freq = freqStruct.freq(freqIndex);
         matrix = mymatrix(freqIndex,:);
-        save([matrixFolder 'matrix1_' basename '_' num2str(freq) 'hz.mat'], 'matrix');
+        save([folderMatrix 'matrix1_' basename '_' num2str(freq) 'hz.mat'], 'matrix');
         ft_progress(freqIndex/nr_freq);
     end 
     ft_progress('close');

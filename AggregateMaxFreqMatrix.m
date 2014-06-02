@@ -3,8 +3,7 @@ function [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr,
     % freq = array of hz vals like [8 8.1 8.2 8.3 ... 9.8]
 
     % input folder
-    folder_matrix = 'F:\Overnight\matrix\';
-
+    LoadFolderNames;
 
     % load matrices
     allfreq_matrix = cell(1,length(freq));
@@ -12,7 +11,7 @@ function [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr,
     ft_progress('init', 'text', 'Loading wpli matrices...');
     for i = 1:length(freq)
         filename = ['matrix_p' int2str(patientnr) '_overnight' int2str(nightnr) '_' num2str(freq(i)) 'hz.mat'];
-        myvar = load([folder_matrix filename]);
+        myvar = load([folderMatrix filename]);
         allfreq_matrix{i} = myvar.matrix;
         if nrEpochs == 0
             nrEpochs = length(myvar.matrix);

@@ -16,11 +16,9 @@ end
 function ProcessFile(i)
 
     % input
-    folder = 'F:\Overnight\Data\';
-    javaaddpath(which('F:\matlab\fieldtrip\external\egi_mff\java\MFF-1.2.jar'));
-
+    
     % output
-    crsspctrFolder = 'F:\Overnight\cross-spectra1\';
+    LoadFolderNames;
     
     % we need to declare the vars defined in different files
     % in order to see them on parallel workers
@@ -104,7 +102,7 @@ function ProcessFile(i)
 
         % load an eeglab set
         chunkLastSample = min(chunkFirstSample + fileChunkSamples - 1, fileLastSample);
-        eeglabSet = pop_readegimff([folder filename], 'firstsample', chunkFirstSample, 'lastsample', chunkLastSample);
+        eeglabSet = pop_readegimff([folderCrossSpectra filename], 'firstsample', chunkFirstSample, 'lastsample', chunkLastSample);
 
         % remove channels we don't want to see
         fprintf('*** Selecting channels...\n');

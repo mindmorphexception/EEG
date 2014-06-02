@@ -5,8 +5,7 @@ function [measures,maxFrequencies] = ComputeGraphMeasures(patientnr, nightnr, fr
     % wpli will be taken as the max in this range of frequencies
     % aux is a string that will be appended at the end of the output filename
     
-    % measures save folder
-    measuresFolder = 'F:\Overnight\measures\';
+    LoadFolderNames;
 
     [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr, freq);
     nrEpochs = length(matrices);
@@ -40,6 +39,6 @@ function [measures,maxFrequencies] = ComputeGraphMeasures(patientnr, nightnr, fr
     
     info.freq = freq;
     info.thresh = thresh;
-    save([measuresFolder 'measures_p' int2str(patientnr) '_overnight' int2str(nightnr) '_' aux '.mat'], 'measures');
-    save([measuresFolder 'info_p' int2str(patientnr) '_overnight' int2str(nightnr) '_' aux '.mat'], 'info');
+    save([folderMeasures 'measures_p' int2str(patientnr) '_overnight' int2str(nightnr) '_' aux '.mat'], 'measures');
+    save([folderMeasures 'info_p' int2str(patientnr) '_overnight' int2str(nightnr) '_' aux '.mat'], 'info');
 end
