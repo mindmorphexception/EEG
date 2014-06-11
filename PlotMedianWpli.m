@@ -17,6 +17,7 @@ function maxMedianWpliEpochNr = PlotMedianWpli(patientnr, nightnr, freq, descrip
     plot(timelabel,medwpli, 'LineWidth', 3);
     set(gca,'FontSize',20)
     axis auto
+    ylim([0 1]);
     %xlabel('Time (hours)');
     %ylabel('Median wpli');
     %title(['Patient ' num2str(patientnr) ' (night ' num2str(nightnr) ') - ' description]);

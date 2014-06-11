@@ -1,10 +1,10 @@
-function ComputeCrossSpectra()
+function ComputePowSpectra()
     clc;
     
     %free = java.lang.Runtime.getRuntime.maxMemory / (2^30)   
 
     % process each file
-    for i = 1:30
+    for i = 16:16
         tic
         ProcessFile(i);
         toc
@@ -15,29 +15,8 @@ end
     
 function ProcessFile(i)
 
-    % output
-    LoadFolderNames;
-    
-    % we need to declare the vars defined in different files
-    % in order to see them on parallel workers
-    %  %%%
-            % data params
-            srate = 0;
-            epochSizeSeconds = 0; % split data into epochs of 10 seconds
-            epochSizeSamples = 0; % the number of samples per epoch
-            fileChunkSamples = 0; % how many samples to read from file at one time
-            chanExcluded = []; % excluded chans            
-            freqCfg = []; % freq analysis configuration
-    %  %%%
-    
+    LoadFolderNames;    
     LoadParams;   
-
-    % {filename firstsample lastsample} mark data where there are no events
-    % besides 'sync' and 'break cnt'
-    
-    
-    % constants
-    EPOCH_EVENT_NAME = 'NEW_EPOCH_EVENT'; 
     
     % construct the first and last samples to read from file
     filename = data{i,1};
@@ -53,9 +32,6 @@ function ProcessFile(i)
 
     % read file chunks 
     sampleIndices = fileFirstSample : fileChunkSamples : fileLastSample;
-    
-    % stddevs will keep the channel variance per epoch
-    stddevs = [];
 
     for sampleIndex = 1 : length(sampleIndices)
         tic
@@ -90,6 +66,11 @@ function ProcessFile(i)
         % eeglabSet = pop_eegfilt(eeglabSet,1,0);
         
         nrEpochs = floor ( length(eeglabSet.times) / epochSizeSamples );
+        if nrEpochs < 1
+            fprintf('*** Skipping this part - less than 1 epoch possible\n');
+            continue;
+        end
+        
         ft_progress('init', 'text', '*** Creating events...');
         events = cell(nrEpochs,2);
         for epochIndex = 1 : nrEpochs
@@ -99,16 +80,13 @@ function ProcessFile(i)
             ft_progress(epochIndex/nrEpochs);
         end
         ft_progress('close');
+
         eeglabSet = pop_importevent(eeglabSet, 'event', events, 'fields', {'type','latency'}, 'append', 'no');
 
         % epoch the data
         fprintf('*** Epoching...\n');
         eeglabSet = pop_epoch(eeglabSet, {EPOCH_EVENT_NAME}, [0 epochSizeSeconds]);
                
-        % TODO: FIX REJECTION
-        % reject (includes rereferencing to common)
-        % eeglabSet = rejartifacts3(eeglabSet,3,1);
-
         % convert to fieltrip format
         fprintf('*** Creating fieldtrip set...\n');
         fieldtripSet = eeglab2fieldtrip(eeglabSet, 'preprocessing', 'none');
@@ -119,23 +97,9 @@ function ProcessFile(i)
             fieldtripSet.sampleinfo(epoch,:) = [epochSizeSamples*(epoch-1)+1 epochSizeSamples*epoch];
         end
 
-        % freq analysis => cross-spectrum
+        % freq analysis => pow-spectrum
         fprintf('*** Performing freqanalysis...\n');
-       
-        crtFreqCfg = freqCfg;
-
-        freq0{sampleIndex} = ft_freqanalysis(crtFreqCfg, fieldtripSet);
-
-        %freqStruct.totalEpochs = floor((fileLastSample - fileFirstSample + 1) / (epochSizeSamples * (actualSrate / srate)) );
-        %freqStruct.epochIndex = 1;
-        %clear freqStruct;
-        %freqStruct = ft_freqanalysis(crtFreqCfg, fieldtripSet);
-
-        %ComputeWpli(freqStruct, filename(1:length(filename)-14));
-
-        %fprintf('*** Saving pow-spectra...\n');  
-        %newfilename = [filename(1:length(filename)-14) '_' num2str(sampleIndex)];
-        %save([folderPowspec 'pow_spectra_' newfilename '.mat'], 'freqStruct'); 
+        freq0{sampleIndex} = ft_freqanalysis(freqCfg, fieldtripSet);
 
         % free up some memory
         clear eeglabSet fieldtripSet;
@@ -146,23 +110,18 @@ function ProcessFile(i)
 
     % set up freqStruct for the whole file
     clear freqStruct;
+    
     freqStruct.totalEpochs = floor((fileLastSample - fileFirstSample + 1) / (epochSizeSamples * (actualSrate / srate)) );
     freqStruct.epochIndex = 1;
     ft_progress('init', 'text', 'Please wait...');
+    
     for sampleIndex = 1:length(sampleIndices)
-        % append cross-spectra to the freqStruct of this file
-        freqStruct = AppendCrossSpectra(freqStruct, freq0{sampleIndex}, 1);
-        
+        % append pow-spectra to the freqStruct of this file
+        freqStruct = AppendPowSpectra(freqStruct, freq0{sampleIndex}, 1);
         ft_progress(sampleIndex/length(sampleIndices));
     end
     ft_progress('close');
     fprintf('*** Saving pow-spectra...\n');
-    save([crsspctrFolder 'cross_spectra_' newfilename '.mat'], 'freqStruct', '-v7.3'); 
-      
-    clear freqStruct freq0;
-
-    fprintf('*** Saving std devs...\n');
-    stddevfilename = filename(1:length(filename)-14);
-    save([stddevFolder 'stddev_' stddevfilename '.mat'], 'stddevs'); 
-
+    newfilename = filename(1:length(filename)-14);
+    save([folderPowspec 'pow_spectra_' newfilename '.mat'], 'freqStruct'); 
 end
