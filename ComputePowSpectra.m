@@ -4,7 +4,7 @@ function ComputePowSpectra()
     %free = java.lang.Runtime.getRuntime.maxMemory / (2^30)   
 
     % process each file
-    for i = 16:16
+    for i = 1:30
         tic
         ProcessFile(i);
         toc
@@ -32,6 +32,8 @@ function ProcessFile(i)
 
     % read file chunks 
     sampleIndices = fileFirstSample : fileChunkSamples : fileLastSample;
+    
+    stddevs = [];
 
     for sampleIndex = 1 : length(sampleIndices)
         tic
@@ -58,8 +60,8 @@ function ProcessFile(i)
         end
 
         % rereference
-        fprintf('*** Rereferencing...\n');
-        eeglabSet = rereference(eeglabSet,1);
+        %fprintf('*** Rereferencing...\n');
+        %eeglabSet = rereference(eeglabSet,1);
 
         % filter data between 1 and 35 Hz
         % eeglabSet = pop_eegfilt(eeglabSet,0,35);
@@ -86,42 +88,51 @@ function ProcessFile(i)
         % epoch the data
         fprintf('*** Epoching...\n');
         eeglabSet = pop_epoch(eeglabSet, {EPOCH_EVENT_NAME}, [0 epochSizeSeconds]);
+        
+        fprintf('*** Calculating std devs...\n');
+        % calculate stddev for channels/epochs
+        for i = 1:size(eeglabSet.data,3)
+            stddevs = [stddevs std(eeglabSet.data(:,:,i),0,2)];
+        end
                
         % convert to fieltrip format
-        fprintf('*** Creating fieldtrip set...\n');
-        fieldtripSet = eeglab2fieldtrip(eeglabSet, 'preprocessing', 'none');
-
-        % manually make sampleinfo to deflect warnings
-        fieldtripSet.sampleinfo = zeros(length(fieldtripSet.trial), 2);
-        for epoch = 1:length(fieldtripSet.trial)
-            fieldtripSet.sampleinfo(epoch,:) = [epochSizeSamples*(epoch-1)+1 epochSizeSamples*epoch];
-        end
-
-        % freq analysis => pow-spectrum
-        fprintf('*** Performing freqanalysis...\n');
-        freq0{sampleIndex} = ft_freqanalysis(freqCfg, fieldtripSet);
-
-        % free up some memory
-        clear eeglabSet fieldtripSet;
+%         fprintf('*** Creating fieldtrip set...\n');
+%         fieldtripSet = eeglab2fieldtrip(eeglabSet, 'preprocessing', 'none');
+% 
+%         % manually make sampleinfo to deflect warnings
+%         fieldtripSet.sampleinfo = zeros(length(fieldtripSet.trial), 2);
+%         for epoch = 1:length(fieldtripSet.trial)
+%             fieldtripSet.sampleinfo(epoch,:) = [epochSizeSamples*(epoch-1)+1 epochSizeSamples*epoch];
+%         end
+% 
+%         % freq analysis => pow-spectrum
+%         fprintf('*** Performing freqanalysis...\n');
+%         freq0{sampleIndex} = ft_freqanalysis(freqCfg, fieldtripSet);
+% 
+%         % free up some memory
+%         clear eeglabSet fieldtripSet;
         toc
     end
     
-    fprintf('*** Appending all pow-spectra...\n');
+    
 
     % set up freqStruct for the whole file
-    clear freqStruct;
-    
-    freqStruct.totalEpochs = floor((fileLastSample - fileFirstSample + 1) / (epochSizeSamples * (actualSrate / srate)) );
-    freqStruct.epochIndex = 1;
-    ft_progress('init', 'text', 'Please wait...');
-    
-    for sampleIndex = 1:length(sampleIndices)
-        % append pow-spectra to the freqStruct of this file
-        freqStruct = AppendPowSpectra(freqStruct, freq0{sampleIndex}, 1);
-        ft_progress(sampleIndex/length(sampleIndices));
-    end
-    ft_progress('close');
-    fprintf('*** Saving pow-spectra...\n');
+%     clear freqStruct;
+%     
+%     freqStruct.totalEpochs = floor((fileLastSample - fileFirstSample + 1) / (epochSizeSamples * (actualSrate / srate)) );
+%     freqStruct.epochIndex = 1;
+%     ft_progress('init', 'text', '*** Appending all pow-spectra...');
+%     for sampleIndex = 1:length(freq0)
+%         % append pow-spectra to the freqStruct of this file
+%         freqStruct = AppendPowSpectra(freqStruct, freq0{sampleIndex}, 1);
+%         ft_progress(sampleIndex/length(freq0));
+%     end
+%     ft_progress('close');
+    %fprintf('*** Saving pow-spectra...\n');
     newfilename = filename(1:length(filename)-14);
-    save([folderPowspec 'pow_spectra_' newfilename '.mat'], 'freqStruct'); 
+    %save([folderPowspec 'pow_spectra1_' newfilename '.mat'], 'freqStruct'); 
+    
+    fprintf('*** Saving std devs...\n');
+    save([folderStdDev 'stddev_' newfilename '.mat'], 'stddevs'); 
+
 end

@@ -5,7 +5,7 @@ epochSizeSeconds = 10; % split data into epochs of 10 seconds
 epochSizeSamples = epochSizeSeconds * srate; % the number of samples per epoch
 processingWindow = 60; % calculate wpli for groups of 60 epochs (60*10 seconds = 10 minutes)
 windowOverlap = 30; % 30 epochs (5 minutes) forward step between wpli groups
-fileChunkSamples = 500000; % how many samples to read from file at one time
+fileChunkSamples = 2000000; % how many samples to read from file at one time
 
 % excluded chans
 chanExcluded = [1,8,14,17,21,25,32,38,43,44,48,49,56,63,64,68,69,73,74,81,82,88,89,94,95,99,107,113,114,119,120,121,125,126,127,128];
@@ -27,8 +27,8 @@ EPOCH_EVENT_NAME = 'NEW_EPOCH_EVENT';
 
 % cleaning params
 % thresholdChanStdDev = 500; % how much variance per epoch to make a channel bad
-thresholdChansPerEpoch = 0.1; % how many bad channels per epoch to make it bad
-thresholdEpochsPerWpli = 0.01; % how many bad epochs per wpli window to make it bad
+thresholdChansPerEpoch = 0.25; % how many bad channels per epoch to make it bad
+thresholdEpochsPerWpli = 0.1; % how many bad epochs per wpli window to make it bad
 
 % check params
 if( mod (fileChunkSamples, epochSizeSamples) ~= 0)

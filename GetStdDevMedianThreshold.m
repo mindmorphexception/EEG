@@ -5,7 +5,7 @@ function med = GetStdDevMedianThreshold(patientnr, nightnr)
     load([folderStdDev filename]);
     med = median(stddevs(:)) + 200;
     
-   % med = 500;
+    med = 500;
     
 end
 

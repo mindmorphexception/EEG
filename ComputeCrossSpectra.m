@@ -104,6 +104,12 @@ function ProcessFile(i)
         % epoch the data
         fprintf('*** Epoching...\n');
         eeglabSet = pop_epoch(eeglabSet, {EPOCH_EVENT_NAME}, [0 epochSizeSeconds]);
+        
+        fprintf('*** Calculating std devs...\n');
+        % calculate stddev for channels/epochs
+        for i = 1:size(eeglabSet.data,3)
+            stddevs = [stddevs std(eeglabSet.data(:,:,i),0,2)];
+        end
                
         % TODO: FIX REJECTION
         % reject (includes rereferencing to common)
