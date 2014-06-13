@@ -1,10 +1,12 @@
 function ComputePowSpectra()
     clc;
+    eeglab;
+    clear all;
     
     %free = java.lang.Runtime.getRuntime.maxMemory / (2^30)   
 
     % process each file
-    for i = 1:30
+    for i = 16:16
         tic
         ProcessFile(i);
         toc
@@ -21,14 +23,14 @@ function ProcessFile(i)
     % construct the first and last samples to read from file
     filename = data{i,1};
     fileFirstSample = data{i,2};
-    fileLastSample = data{i,3}; %2000000 + 3600 * data{i,4} - 1;
+    fileLastSample = 100000; %data{i,3}; %2000000 + 3600 * data{i,4} - 1;
     
     if(fileLastSample > data{i,3})
         return;
     end
 
     actualSrate = data{i,4};
-    fprintf('Reading %f hours of file %s\n', (fileLastSample - fileFirstSample + 1) / (actualSrate * 60 * 60), filename);
+    fprintf('Reading %f hours of file %s\n', (fileLastSample - fileFirstSample + 1) / (actualSrate * 60 * 60), [folderData filename]);
 
     % read file chunks 
     sampleIndices = fileFirstSample : fileChunkSamples : fileLastSample;

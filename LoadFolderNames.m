@@ -25,7 +25,6 @@ if(environment == 1) % ============== Windows ============== %
 elseif(environment == 2) % ============== WBIC ============== %
     % add java path
     javaaddpath(which('MFF-1.0.d0004.jar'));
-    %javaaddpath(which('/Volumes/home/imc31/matlab/fieldtrip/external/egi_mff/java/MFF-1.2.jar'));
     % data folder
     folderData = '/data0/imc31/Overnight/Data/';
     % power spectra folder
@@ -45,24 +44,24 @@ elseif(environment == 2) % ============== WBIC ============== %
     
 elseif(environment == 3) % ============== MRC-CBU (Srivas) ============== %
     % add java path
-    javaaddpath(which('MFF-1.0.d0004.jar'));
+    javaaddpath(which('MFF-1.2.jar'));
     %javaaddpath(which('/Volumes/home/imc31/matlab/fieldtrip/external/egi_mff/java/MFF-1.2.jar'));
     % data folder
-    folderData = '/imaging/sc03/Overnight';
+    folderData = '/imaging/sc03/Overnight/';
     % power spectra folder
     folderPowspec = '/imaging/sc03/Iulia/power-spectra/';
     % cross spectra folder
-    folderCrossSpectra = '/data0/imc31/Overnight/cross-spectra/';
+    folderCrossSpectra = '/imaging/sc03/Iulia/cross-spectra/';
     % chanlocs filepath
     chanlocsPath = '/Volumes/home/imc31/matlab/Iulia/chanlocs';
     %matrixFolder
-    folderMatrix = '/scratch/imc31/Overnight/matrix/';
+    folderMatrix = '/imaging/sc03/Iulia/matrix/';
     % measures folder
-    folderMeasures = '/data0/imc31/Overnight/measures/';
+    folderMeasures = '/imaging/sc03/Iulia/measures/';
     % figures folder
-    folderFigures = '/data0/imc31/Overnight/figures/';
+    folderFigures = '/imaging/sc03/Iulia/figures/';
     %std dev folder
-    folderStdDev = '/scratch/imc31/Overnight/stddev/';
+    folderStdDev = '/imaging/sc03/Iulia/stddev/';
 end
 
 % {filename firstsample lastsample} mark data where there are no events
