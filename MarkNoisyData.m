@@ -79,23 +79,28 @@ function [stddevs, noisinessMatrix] = MarkNoisyData(patientnr, nightnr)
         save(stddevfilename,'stddevs');
     end
     
-    % generate noisiness matrix
     noisinessMatrixFilename = [folderStdDev 'noisiness_matrix_p' num2str(patientnr) '_overnight' num2str(nightnr) '.mat'];
     
+    % load thresholds and nrchans
+    thresholdChanStdDev = GetStdDevMedianThreshold(patientnr, nightnr);
+    thresholdBadChansPerEpoch = GetThresholdBadChansPerEpoch(patientnr, nightnr);
     nrChans = size(stddevs,1);
+    
     fprintf('*** Generating noisiness matrix.\n');
     noisinessMatrix = zeros(size(stddevs));
-    threshold = GetStdDevMedianThreshold(patientnr, nightnr);
-    fprintf('*** Median is %f.\n', threshold);
-    badChanIndices = stddevs >= threshold;
+    
+    % mark bad channels
+    fprintf('*** Channel threshold is %f.\n', thresholdChanStdDev);
+    badChanIndices = stddevs >= thresholdChanStdDev;
     noisinessMatrix(badChanIndices) = 1;
-    badEpochIndices = sum(noisinessMatrix,1) > thresholdChansPerEpoch * nrChans;
+    fprintf('*** Marked %d channels as bad (%f).\n', sum(badChanIndices), sum(badChanIndices)/size(noisinessMatrix,1));
+    
+    % mark bad epochs
+    badEpochIndices = sum(noisinessMatrix,1) > thresholdBadChansPerEpoch * nrChans;
     fprintf('*** Marking %d (%f%%) epochs as bad.\n',sum(badEpochIndices), sum(badEpochIndices)/length(badEpochIndices));
     noisinessMatrix(:, badEpochIndices) = 1;
     save(noisinessMatrixFilename,'noisinessMatrix');
     
-    %fprintf('Marked %d channels as bad (%f).\n', sum(badChanIndices), sum(badChanIndices)/size(noisinessMatrix,1));
-    %fprintf('Marked %d epochs as bad (%f).\n', sum(badEpochIndices), sum(badEpochIndices)/size(noisinessMatrix,2));
     fprintf('Done.\n');
 end
 

@@ -27,6 +27,11 @@ function PlotStdDevs_vs_Wpli(patientnr, nightnr)
     t2 = MakeTimeLabelsWpliEpochs(length(medwpli));
     hold all 
     plot(t2, medwpli*factor, 'b');
+    
+    hold all
+    thresholdChanStdDev = GetStdDevMedianThreshold(patientnr, nightnr);
+    plot(xlim, [thresholdChanStdDev thresholdChanStdDev], 'Color', [0 0 0]);
+
      
 end
 
