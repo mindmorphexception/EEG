@@ -1,10 +1,11 @@
-function matrices = CleanMatrices(matrices, noisinessMatrix)
+function matrices = CleanMatrices(matrices, noisinessMatrix, patientnr, nightnr)
 % cleans a cell of matrices according to their noisiness matrix
     LoadParams;
 
     epochIndex = 1;
     nrChans = size(noisinessMatrix,1);
     nrMatricesCleaned = 0;
+    thresholdBadEpochsPerWpli = GetThresholdBadEpochsPerWpli(patientnr, nightnr);
     
     % for each epoch in the matrices
     for wpliIndex = 1:length(matrices)
@@ -19,7 +20,7 @@ function matrices = CleanMatrices(matrices, noisinessMatrix)
         end
         
         % set current matrix to NaN if there are too many bad epochs
-        if(nrBadEpochs > thresholdEpochsPerWpli * processingWindow)
+        if(nrBadEpochs > thresholdBadEpochsPerWpli * processingWindow)
             matrices{wpliIndex} = NaN;
             nrMatricesCleaned = nrMatricesCleaned + 1;
         end

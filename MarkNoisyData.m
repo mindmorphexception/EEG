@@ -2,6 +2,7 @@ function [stddevs, noisinessMatrix] = MarkNoisyData(patientnr, nightnr)
 % stdThreshold: channels with std >= stdThreshold will be marked as bad
 % nrBadChannelsThreshold: epochs with this number of (or more) bad channels will be marked as bad.
 
+    
     LoadFolderNames;
     LoadParams;
    
@@ -14,7 +15,7 @@ function [stddevs, noisinessMatrix] = MarkNoisyData(patientnr, nightnr)
         fprintf('*** Generating std dev matrix.\n');
         
         % get file index 
-        i = GetFileIndex(patientnr, nightnr); 
+        i = GetPatientIndex(patientnr, nightnr); 
 
         % construct the first and last samples to read from file
         filename = data{i,1};
@@ -82,7 +83,7 @@ function [stddevs, noisinessMatrix] = MarkNoisyData(patientnr, nightnr)
     noisinessMatrixFilename = [folderStdDev 'noisiness_matrix_p' num2str(patientnr) '_overnight' num2str(nightnr) '.mat'];
     
     % load thresholds and nrchans
-    thresholdChanStdDev = GetStdDevMedianThreshold(patientnr, nightnr);
+    thresholdChanStdDev = GetThresholdChannelStdDev(patientnr, nightnr);
     thresholdBadChansPerEpoch = GetThresholdBadChansPerEpoch(patientnr, nightnr);
     nrChans = size(stddevs,1);
     
@@ -93,13 +94,12 @@ function [stddevs, noisinessMatrix] = MarkNoisyData(patientnr, nightnr)
     fprintf('*** Channel threshold is %f.\n', thresholdChanStdDev);
     badChanIndices = stddevs >= thresholdChanStdDev;
     noisinessMatrix(badChanIndices) = 1;
-    fprintf('*** Marked %d channels as bad (%f).\n', sum(badChanIndices), sum(badChanIndices)/size(noisinessMatrix,1));
     
     % mark bad epochs
-    badEpochIndices = sum(noisinessMatrix,1) > thresholdBadChansPerEpoch * nrChans;
-    fprintf('*** Marking %d (%f%%) epochs as bad.\n',sum(badEpochIndices), sum(badEpochIndices)/length(badEpochIndices));
-    noisinessMatrix(:, badEpochIndices) = 1;
-    save(noisinessMatrixFilename,'noisinessMatrix');
+    %badEpochIndices = sum(noisinessMatrix,1) > thresholdBadChansPerEpoch * nrChans;
+    %fprintf('*** Marking %d (%f%%) epochs as bad.\n',sum(badEpochIndices), sum(badEpochIndices)/length(badEpochIndices));
+    %noisinessMatrix(:, badEpochIndices) = 1;
+    %save(noisinessMatrixFilename,'noisinessMatrix');
     
     fprintf('Done.\n');
 end

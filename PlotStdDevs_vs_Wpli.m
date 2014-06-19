@@ -20,7 +20,7 @@ function PlotStdDevs_vs_Wpli(patientnr, nightnr)
     plot(t2, medwpli*factor, 'k--');
     
     [~, noisinessMatrix] = MarkNoisyData(patientnr, nightnr);
-    matrices = CleanMatrices(matrices, noisinessMatrix);
+    matrices = CleanMatrices(matrices, noisinessMatrix, patientnr, nightnr);
     for t = 1:nrEpochs
         medwpli(t) = median(matrices{t}(:));
     end
@@ -29,9 +29,8 @@ function PlotStdDevs_vs_Wpli(patientnr, nightnr)
     plot(t2, medwpli*factor, 'b');
     
     hold all
-    thresholdChanStdDev = GetStdDevMedianThreshold(patientnr, nightnr);
+    thresholdChanStdDev = GetThresholdChannelStdDev(patientnr, nightnr);
     plot(xlim, [thresholdChanStdDev thresholdChanStdDev], 'Color', [0 0 0]);
-
      
 end
 

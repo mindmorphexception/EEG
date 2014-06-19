@@ -55,7 +55,7 @@ function [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr,
     % clean matrix
     if cleanMatrix
         [~, noisinessMatrix] = MarkNoisyData(patientnr, nightnr);
-        matrices = CleanMatrices( matrices, noisinessMatrix);
+        matrices = CleanMatrices(matrices, noisinessMatrix, patientnr, nightnr);
     end
 end
 

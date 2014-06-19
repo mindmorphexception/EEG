@@ -21,7 +21,7 @@ function ProcessFile(i)
     % construct the first and last samples to read from file
     filename = data{i,1};
     fileFirstSample = data{i,2};
-    fileLastSample = data{i,3}; %2000000 + 3600 * data{i,4} - 1;
+    fileLastSample = 200000; %data{i,3}; %2000000 + 3600 * data{i,4} - 1;
     
     if(fileLastSample > data{i,3})
         return;

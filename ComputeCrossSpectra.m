@@ -15,12 +15,10 @@ end
     
 function ProcessFile(i)
 
-    % output
     LoadFolderNames;
     
     % we need to declare the vars defined in different files
     % in order to see them on parallel workers
-    %  %%%
             % data params
             srate = 0;
             epochSizeSeconds = 0; % split data into epochs of 10 seconds
@@ -28,31 +26,36 @@ function ProcessFile(i)
             fileChunkSamples = 0; % how many samples to read from file at one time
             chanExcluded = []; % excluded chans            
             freqCfg = []; % freq analysis configuration
-    %  %%%
+    %
     
-    LoadParams;   
-
-    % {filename firstsample lastsample} mark data where there are no events
-    % besides 'sync' and 'break cnt'
-    
+    LoadParams;    
     
     % construct the first and last samples to read from file
     filename = data{i,1};
-    fileFirstSample = data{i,2};
-    fileLastSample = data{i,3}; %2000000 + 3600 * data{i,4} - 1;
     
-    if(fileLastSample > data{i,3})
+    [patientnr, nightnr] = GetPatientNightNr(i);
+    
+    fileFirstSample = 1; %data{i,2};
+    fileLastSample = 450000; %data{i,3}; %2000000 + 3600 * data{i,4} - 1;
+    
+    if isnan(data{i,5})
         return;
     end
-
+    
+    % store srate and thresholds
     actualSrate = data{i,4};
+    thresholdChannelStdDev = data{i,5};
+    thresholdBadChansPerEpochs = data{i,6};
+    
+    % load stddevs and noisiness
+    [~, noisiness] = MarkNoisyData(patientnr, nightnr);
+    
     fprintf('Reading %f hours of file %s\n', (fileLastSample - fileFirstSample + 1) / (actualSrate * 60 * 60), filename);
 
     % read file chunks 
     sampleIndices = fileFirstSample : fileChunkSamples : fileLastSample;
 
     for sampleIndex = 1 : length(sampleIndices)
-        tic
         fprintf('*** This is worker %d out of %d starting!\n',sampleIndex, length(sampleIndices));
         
         chunkFirstSample = sampleIndices(sampleIndex);
@@ -75,13 +78,9 @@ function ProcessFile(i)
             error('too small sampling rate');
         end
 
-        % rereference
-        fprintf('*** Rereferencing...\n');
-        eeglabSet = rereference(eeglabSet,1);
-
-        % filter data between 1 and 35 Hz
+        % filter data above 0.09 Hz
         % eeglabSet = pop_eegfilt(eeglabSet,0,35);
-        % eeglabSet = pop_eegfilt(eeglabSet,1,0);
+        eeglabSet = pop_eegfilt(eeglabSet,0.09,0);
         
         nrEpochs = floor ( length(eeglabSet.times) / epochSizeSamples );
         ft_progress('init', 'text', '*** Creating events...');
@@ -95,14 +94,51 @@ function ProcessFile(i)
         ft_progress('close');
         eeglabSet = pop_importevent(eeglabSet, 'event', events, 'fields', {'type','latency'}, 'append', 'no');
 
-        % epoch the data
+        % epoch the data 
         fprintf('*** Epoching...\n');
         eeglabSet = pop_epoch(eeglabSet, {EPOCH_EVENT_NAME}, [0 epochSizeSeconds]);
         
-        % TODO: FIX REJECTION
-        % reject (includes rereferencing to common)
-        % eeglabSet = rejartifacts3(eeglabSet,3,1);
-
+        % interpolate noisy channels in each epoch
+        fprintf('*** Interpolating... (channel ordering error is not important)\n');
+        for e = 1:eeglabSet.trials
+            
+            if (sum(noisiness(:,e)) > 0 && ... % if there are any bad channels
+                sum(noisiness(:,e)) < thresholdBadChansPerEpochs * eeglabSet.nbchan) % and not all chans are bad
+                
+                % make a new eeglabset
+                epochSet = [];
+                epochSet.setname = ['Set for epoch ' num2str(e)];
+                epochSet.srate = eeglabSet.srate;
+                epochSet.nbchan = eeglabSet.nbchan;
+                epochSet.times = eeglabSet.times;
+                epochSet.trials = 1;
+                epochSet.event = [];
+                epochSet.xmin = eeglabSet.xmin;
+                epochSet.xmax = eeglabSet.xmax;
+                epochSet.chanlocs = eeglabSet.chanlocs;
+                epochSet.chaninfo = eeglabSet.chaninfo;
+                epochSet.data = eeglabSet.data(:,:,e);
+                epochSet.etc = [];
+                epochSet.icaact = [];
+                epochSet.epoch = [];
+                epochSet.specdata = [];
+                epochSet.icachansind = [];
+                epochSet.icawinv = [];
+                epochSet.specicaact = [];
+                epochSet.icasphere = [];
+                epochSet.specicaact = [];
+                epochSet.icaweights = [];
+                
+                % interpolate
+                epochSet = pop_interp(epochSet, find(noisiness(:,e) > 0), 'spherical');
+                eeglabSet.data(:,:,e) = epochSet.data;
+            end
+        end
+        
+        % rereference
+        fprintf('*** Rereferencing...\n');
+        eeglabSet = rereference(eeglabSet,1);
+        
         % convert to fieltrip format
         fprintf('*** Creating fieldtrip set...\n');
         fieldtripSet = eeglab2fieldtrip(eeglabSet, 'preprocessing', 'none');
@@ -112,13 +148,13 @@ function ProcessFile(i)
         for epoch = 1:length(fieldtripSet.trial)
             fieldtripSet.sampleinfo(epoch,:) = [epochSizeSamples*(epoch-1)+1 epochSizeSamples*epoch];
         end
+        
+        
 
         % freq analysis => cross-spectrum
         fprintf('*** Performing freqanalysis...\n');
        
         crtFreqCfg = freqCfg;
-
-        %freq0{sampleIndex} = ft_freqanalysis(crtFreqCfg, fieldtripSet);
 
         %freqStruct.totalEpochs = floor((fileLastSample - fileFirstSample + 1) / (epochSizeSamples * (actualSrate / srate)) );
         %freqStruct.epochIndex = 1;
@@ -126,15 +162,14 @@ function ProcessFile(i)
         
         freqStruct = ft_freqanalysis(crtFreqCfg, fieldtripSet);
 
-        ComputeWpli(freqStruct, filename(1:length(filename)-14));
+        ComputeWpli(freqStruct, filename(1:length(filename)-14), patientnr, nightnr);
 
-        %fprintf('*** Saving pow-spectra...\n');  
+        %fprintf('*** Saving cross-spectra...\n');  
         %newfilename = [filename(1:length(filename)-14) '_' num2str(sampleIndex)];
         %save([folderPowspec 'pow_spectra_' newfilename '.mat'], 'freqStruct'); 
 
         % free up some memory
         clear eeglabSet fieldtripSet;
-        toc
     end
     
 %     fprintf('*** Appending all pow-spectra...\n');

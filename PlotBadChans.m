@@ -4,7 +4,7 @@ function PlotBadChans(patientnr, nightnr)
     [stddevs, noise] = MarkNoisyData(patientnr, nightnr);
     
     % plot nr of bad channels at every epoch
-    thresholdChanStdDev = GetStdDevMedianThreshold(patientnr, nightnr);
+    thresholdChanStdDev = GetThresholdChannelStdDev(patientnr, nightnr);
     t1 = MakeTimeLabelsCrossSpectraEpochs(size(stddevs,2));
     figure;
     bar(t1,sum(stddevs>thresholdChanStdDev));

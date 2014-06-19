@@ -1,38 +1,11 @@
-function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, varargin)
+function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, patientnr, nightnr, varargin)
 
 % Computes the WPLI using the fieldtrip toolbox.
 % If freqStruct is the filename where the struct is stored, loadStructFromFile is one.
 % See main function for more details.
 
-%     paramcheck = finputcheck(varargin, ...
-%        {
-%        'save' 'integer' [0 1] 1;
-%        'frequencyParam' 'string' {'max', 'min', 'mean'} 'max'
-%        });
-%     
-%     if(isstr(paramcheck))
-%         error(paramcheck);
-%     end
-
 
     LoadFolderNames;
-    
-%     try
-%     matlabpool close
-%     catch
-%     end
-%     matlabpool
-    
-    % we need to declare the vars defined in different files
-    % in order to see them on parallel workers
-    %  %%%
-            processingWindow = 1; % calculate wpli for groups of 60 epochs (60*10 seconds = 10 minutes)
-            windowOverlap = 1; % 1 epochs (10 seconds) forward step between wpli groups
-            
-            % connectivity analysis configuration
-            connectivityCfg = [];
-    %  %%%
-    
     LoadParams;
 
     % if the struct is empty, load it from file
@@ -42,16 +15,15 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, vara
         fprintf('Done.\n');
     end
     
+    [~, noisiness] = MarkNoisyData(patientnr, nightnr);
+    
 
     % initialize things
     nrEpochs = size(freqStruct.crsspctrm, 1); % total nr of epochs
-    %index = 1; % group (window) index
     nrWindows = floor((nrEpochs - processingWindow)/windowOverlap)+1;
     connectivityStruct = cell(1, nrWindows);
     mymatrix = cell(length(freqStruct.freq), nrWindows);
     fprintf('Expecting %d windows\n', length(connectivityStruct));
-    %low_freq = freqStruct.freq(1);
-    %high_freq = freqStruct.freq(length(freqStruct.freq));
     nr_freq = length(freqStruct.freq);
     
     % make a new freq struct as a template for wpli function calls
@@ -64,7 +36,7 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, vara
     
     % calculate wpli for every group (window) of epochs
     
-    fprintf('*** Computing number of windows (uhh)...\n');
+    fprintf('*** Computing number of windows...\n');
     endOfIndex = 0;
     for firstEpoch = 1 : windowOverlap : nrEpochs-processingWindow+1
         endOfIndex = endOfIndex+1;
@@ -73,7 +45,7 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, vara
         error('something is not right with the nr of windows');
     end
     
-    fprintf('*** Calculating WPLI for every epoch in parallel...\n');   
+    fprintf('*** Calculating WPLI for every epoch...\n');   
     warning('off','MATLAB:colon:nonIntegerIndex');
     for index = 1 : endOfIndex
         
@@ -88,14 +60,36 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, vara
         crtFreqStruct2.cumsumcnt = freqStruct.cumsumcnt(firstEpoch:lastEpoch,:);
         crtFreqStruct2.cumtapcnt = freqStruct.cumtapcnt(firstEpoch:lastEpoch,:);
         
-        % do connectivity analysis => debiased phase lag index
-        connectivityStruct{index} = ft_connectivityanalysis(connectivityCfg, crtFreqStruct2);
+        % skip bad epochs from the calculation
+        nrBadEpochs = 0;
+        thresholdBadEpochsPerWpli = GetThresholdBadEpochsPerWpli(patientnr, nightnr);
+        for e = firstEpoch:lastEpoch
+            if sum(noisiness(:,e)) > thresholdBadEpochsPerWpli * size(noisiness,1)
+                crtFreqStruct2.powspctrm(e - nrBadEpochs - firstEpoch,:,:) = [];
+                crtFreqStruct2.crsspctrm(e - nrBadEpochs - firstEpoch,:,:) = [];
+                crtFreqStruct2.cumsumcnt(e - nrBadEpochs - firstEpoch,:) = [];
+                crtFreqStruct2.cumtapcnt(e - nrBadEpochs - firstEpoch,:) = [];
+                nrBadEpochs = nrBadEpochs + 1;
+            end
+        end
+        
+        % skip all epochs if too many are bad
+        calcWpli = 1;
+        if nrBadEpochs > GetThresholdBadEpochsPerWpli(patientnr, nightnr) * processingWindow
+            calcWpli = 0;
+        else
+            % do connectivity analysis => debiased phase lag index
+            connectivityStruct{index} = ft_connectivityanalysis(connectivityCfg, crtFreqStruct2);
+        end
         
         % add to connectivity matrix
         fprintf('*** Making connectivity matrices...\n');
         for freqIndex = 1:nr_freq
-            freq = freqStruct.freq(freqIndex); %low_freq + (freqIndex-1) * 0.1;
-            mymatrix{freqIndex,index} = MakeConnectivityMatrix(connectivityStruct{index}, freq);
+            freq = freqStruct.freq(freqIndex); 
+            mymatrix{freqIndex,index} = NaN;
+            if calcWpli
+                mymatrix{freqIndex,index} = MakeConnectivityMatrix(connectivityStruct{index}, freq);
+            end
         end
     end
 

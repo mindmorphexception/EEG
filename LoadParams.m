@@ -14,7 +14,7 @@ chanExcluded = [1,8,14,17,21,25,32,38,43,44,48,49,56,63,64,68,69,73,74,81,82,88,
 clear freqCfg;
 freqCfg.method = 'mtmfft';
 freqCfg.output = 'powandcsd';
-freqCfg.foi = 1:0.1:20; % frequencies of interest
+freqCfg.foi = 0.1:0.1:20; % frequencies of interest
 freqCfg.keeptrials = 'yes';
 freqCfg.taper = 'hanning';
 
