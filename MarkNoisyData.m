@@ -1,17 +1,18 @@
 function [stddevs, noisinessMatrix] = MarkNoisyData(patientnr, nightnr)
-% stdThreshold: channels with std >= stdThreshold will be marked as bad
-% nrBadChannelsThreshold: epochs with this number of (or more) bad channels will be marked as bad.
-
-    
+ 
     LoadFolderNames;
     LoadParams;
    
     % load or generate std dev matrix
     stddevfilename = [folderStdDev 'stddev_p' num2str(patientnr) '_overnight' num2str(nightnr) '.mat'];
+    
     if (exist(stddevfilename, 'file'))
+       
         fprintf('*** Loading std dev matrix.\n');
         load(stddevfilename);
+        
     else
+        
         fprintf('*** Generating std dev matrix.\n');
         
         % get file index 
