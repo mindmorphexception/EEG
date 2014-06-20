@@ -62,13 +62,13 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
         
         % skip bad epochs from the calculation
         nrBadEpochs = 0;
-        thresholdBadEpochsPerWpli = GetThresholdBadEpochsPerWpli(patientnr, nightnr);
+        thresholdBadChansPerEpoch = GetThresholdBadChansPerEpoch(patientnr, nightnr) * size(noisiness,1);
         for e = firstEpoch:lastEpoch
-            if sum(noisiness(:,e)) > thresholdBadEpochsPerWpli * size(noisiness,1)
-                crtFreqStruct2.powspctrm(e - nrBadEpochs - firstEpoch,:,:) = [];
-                crtFreqStruct2.crsspctrm(e - nrBadEpochs - firstEpoch,:,:) = [];
-                crtFreqStruct2.cumsumcnt(e - nrBadEpochs - firstEpoch,:) = [];
-                crtFreqStruct2.cumtapcnt(e - nrBadEpochs - firstEpoch,:) = [];
+            if sum(noisiness(:,e)) > thresholdBadChansPerEpoch
+                crtFreqStruct2.powspctrm(e - nrBadEpochs - firstEpoch + 1,:,:) = [];
+                crtFreqStruct2.crsspctrm(e - nrBadEpochs - firstEpoch + 1,:,:) = [];
+                crtFreqStruct2.cumsumcnt(e - nrBadEpochs - firstEpoch + 1,:) = [];
+                crtFreqStruct2.cumtapcnt(e - nrBadEpochs - firstEpoch + 1,:) = [];
                 nrBadEpochs = nrBadEpochs + 1;
             end
         end

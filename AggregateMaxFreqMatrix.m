@@ -1,10 +1,6 @@
-function [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr, freq, cleanMatrix)
+function [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr, freq)
     % Get a matrix of the max values for a patient in a range of frequencies
     % freq = array of hz vals like [8 8.1 8.2 8.3 ... 9.8]
-    
-    if (isempty(cleanMatrix))
-        cleanMatrix = 1;
-    end
 
     % input folder
     LoadFolderNames;
@@ -52,10 +48,5 @@ function [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr,
     end
     ft_progress('close');
     
-    % clean matrix
-    if cleanMatrix
-        [~, noisinessMatrix] = MarkNoisyData(patientnr, nightnr);
-        matrices = CleanMatrices(matrices, noisinessMatrix, patientnr, nightnr);
-    end
 end
 

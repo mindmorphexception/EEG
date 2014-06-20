@@ -35,8 +35,8 @@ function ProcessFile(i)
     
     [patientnr, nightnr] = GetPatientNightNr(i);
     
-    fileFirstSample = 1; %data{i,2};
-    fileLastSample = 450000; %data{i,3}; %2000000 + 3600 * data{i,4} - 1;
+    fileFirstSample = data{i,2};
+    fileLastSample = data{i,3}; %2000000 + 3600 * data{i,4} - 1;
     
     if isnan(data{i,5})
         return;
@@ -80,7 +80,7 @@ function ProcessFile(i)
 
         % filter data above 0.09 Hz
         % eeglabSet = pop_eegfilt(eeglabSet,0,35);
-        eeglabSet = pop_eegfilt(eeglabSet,0.09,0);
+        % eeglabSet = pop_eegfilt(eeglabSet,0.09,0);
         
         nrEpochs = floor ( length(eeglabSet.times) / epochSizeSamples );
         ft_progress('init', 'text', '*** Creating events...');
@@ -99,7 +99,7 @@ function ProcessFile(i)
         eeglabSet = pop_epoch(eeglabSet, {EPOCH_EVENT_NAME}, [0 epochSizeSeconds]);
         
         % interpolate noisy channels in each epoch
-        fprintf('*** Interpolating... (channel ordering error is not important)\n');
+        fprintf('*** Interpolating... (field ordering error is not important)\n');
         for e = 1:eeglabSet.trials
             
             if (sum(noisiness(:,e)) > 0 && ... % if there are any bad channels
