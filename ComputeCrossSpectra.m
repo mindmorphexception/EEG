@@ -7,7 +7,7 @@ function ComputeCrossSpectra(index)
     
     fprintf('*** Java memory is %f\n', java.lang.Runtime.getRuntime.maxMemory / (2^30));   
 
-    % process each file
+    % process file
     ProcessFile(index);
 
     fprintf('Done.\n');
@@ -16,28 +16,17 @@ end
 function ProcessFile(i)
 
     LoadFolderNames;
-    
-    % we need to declare the vars defined in different files
-    % in order to see them on parallel workers
-            % data params
-            srate = 0;
-            epochSizeSeconds = 0; % split data into epochs of 10 seconds
-            epochSizeSamples = 0; % the number of samples per epoch
-            fileChunkSamples = 0; % how many samples to read from file at one time
-            chanExcluded = []; % excluded chans            
-            freqCfg = []; % freq analysis configuration
-    %
-    
     LoadParams;    
     
-    % construct the first and last samples to read from file
+    % get filename and extract patient and night nr
     filename = data{i,1};
-    
     [patientnr, nightnr] = GetPatientNightNr(i);
     
+    % construct the first and last samples to read from file
     fileFirstSample = data{i,2};
-    fileLastSample = data{i,3}; %2000000 + 3600 * data{i,4} - 1;
+    fileLastSample = data{i,3};
     
+    % don't process if cleaning thresholds not set
     if isnan(data{i,5})
         return;
     end
@@ -66,7 +55,6 @@ function ProcessFile(i)
 
         % remove channels we don't want to see
         fprintf('*** Selecting channels...\n');
-
         eeglabSet = pop_select(eeglabSet, 'nochannel', chanExcluded);
 
         % make sure the sampling rate is the one we want
@@ -82,6 +70,7 @@ function ProcessFile(i)
         % eeglabSet = pop_eegfilt(eeglabSet,0,35);
         % eeglabSet = pop_eegfilt(eeglabSet,0.09,0);
         
+        % create events for epoching
         nrEpochs = floor ( length(eeglabSet.times) / epochSizeSamples );
         ft_progress('init', 'text', '*** Creating events...');
         events = cell(nrEpochs,2);
@@ -148,26 +137,16 @@ function ProcessFile(i)
         for epoch = 1:length(fieldtripSet.trial)
             fieldtripSet.sampleinfo(epoch,:) = [epochSizeSamples*(epoch-1)+1 epochSizeSamples*epoch];
         end
-        
-        
 
         % freq analysis => cross-spectrum
         fprintf('*** Performing freqanalysis...\n');
        
-        crtFreqCfg = freqCfg;
+        freqStruct = ft_freqanalysis(freqCfg, fieldtripSet);
+        ComputeWpli(freqStruct, filename(1:length(filename)-14), patientnr, nightnr);
 
         %freqStruct.totalEpochs = floor((fileLastSample - fileFirstSample + 1) / (epochSizeSamples * (actualSrate / srate)) );
         %freqStruct.epochIndex = 1;
-        %clear freqStruct;
         
-        freqStruct = ft_freqanalysis(crtFreqCfg, fieldtripSet);
-
-        ComputeWpli(freqStruct, filename(1:length(filename)-14), patientnr, nightnr);
-
-        %fprintf('*** Saving cross-spectra...\n');  
-        %newfilename = [filename(1:length(filename)-14) '_' num2str(sampleIndex)];
-        %save([folderPowspec 'pow_spectra_' newfilename '.mat'], 'freqStruct'); 
-
         % free up some memory
         clear eeglabSet fieldtripSet;
     end

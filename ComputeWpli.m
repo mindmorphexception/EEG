@@ -1,9 +1,7 @@
 function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, patientnr, nightnr, varargin)
 
 % Computes the WPLI using the fieldtrip toolbox.
-% If freqStruct is the filename where the struct is stored, loadStructFromFile is one.
-% See main function for more details.
-
+% If freqStruct is empty, it will be loaded from 'basename' file.
 
     LoadFolderNames;
     LoadParams;
@@ -34,8 +32,7 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
     crtFreqStruct.elec = freqStruct.elec;
     crtFreqStruct.cfg = freqStruct.cfg;
     
-    % calculate wpli for every group (window) of epochs
-    
+    % validate nr of windows
     fprintf('*** Computing number of windows...\n');
     endOfIndex = 0;
     for firstEpoch = 1 : windowOverlap : nrEpochs-processingWindow+1
@@ -45,6 +42,7 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
         error('something is not right with the nr of windows');
     end
     
+    % calculate wpli for every group (window) of epochs
     fprintf('*** Calculating WPLI for every epoch...\n');   
     warning('off','MATLAB:colon:nonIntegerIndex');
     for index = 1 : endOfIndex
@@ -73,7 +71,7 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
             end
         end
         
-        % skip all epochs if too many are bad
+        % skip calculating the current wpli if too many epochs are bad
         calcWpli = 1;
         if nrBadEpochs > GetThresholdBadEpochsPerWpli(patientnr, nightnr) * processingWindow
             calcWpli = 0;
