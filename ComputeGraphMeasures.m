@@ -9,25 +9,23 @@ function [measures,maxFrequencies] = ComputeGraphMeasures(patientnr, nightnr, fr
 
     [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr, freq);
     nrEpochs = length(matrices);
-    
-    % normalize all
-    for t = 1:nrEpochs
-        matrices{t} = matrices{t} / norm(matrices{t});
-    end
 
     measures = cell(1,nrEpochs);
     ft_progress('init','text','Epochs done:');
     % for every epoch
     for t = 1:nrEpochs
+        
+        if ~isempty(find(isnan(matrices{t})))
+            measures{t} = NaN;
+            continue;
+        end
+        
         thrMeasures = cell(1,length(thresh));
         
         % for every threshold
         for thr = 1:length(thresh)
             % apply threshold
             matrix = threshold_proportional(matrices{t},thresh(thr));
-            
-            % normalize matrix using the norm
-            matrix = matrix/norm(matrix);
             
             % compute measures
             thrMeasures{thr} = ComputeGraphMeasuresCore(matrix);

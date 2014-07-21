@@ -1,5 +1,11 @@
-function PlotMeasuresStd(patientnr, nightnrs, aux, measureNames)
+function PlotMeasuresStd(patientnr, nightnrs, aux)
 % Plots the std dev of graph measures
+
+    measureNames = {'meanclustering', 'maxclustering', 'stdclustering', ...
+            'modularity', 'globalEfficiency', 'pathlen',...
+            'meanbetweenness', 'maxbetweenness', 'stdbetweenness', ...
+            'meanparticipation', 'maxparticipation', 'stdparticipation'};
+    
     
     LoadFolderNames;
     
@@ -27,27 +33,32 @@ function PlotMeasuresStd(patientnr, nightnrs, aux, measureNames)
                 % make the array of measure vals
                 measurevals = zeros(1,nrEpochs);
                 for j = 1:nrEpochs
-                    measurevals(j) = measures{j}.(measureNames{i});
+                    try
+                        measurevals(j) = measures{j}.(measureNames{i});
+                    catch
+                        measurevals(j) = NaN;
+                    end
                 end 
                 
                 % compute std dev
-                values{i}(f,n) = std(measurevals);
+                values{i}(f,n) = nanstd(measurevals);
             end
         end
     end
     
     % make bar plots for each measure
-    figure;
-    %suptitle(['Patient ' num2str(patientnr) ' - Standard deviations of connectivity measures']);
+    set(gca,'FontSize',20);
+    suptitle(['Patient ' num2str(patientnr) ' - Standard deviations of connectivity measures']);
     for i = 1:length(measureNames)
         subplot(length(measureNames),1,i);
         bar(values{i});
-        %ylabel(measureNames{i});
-        set(gca,'xticklabel', {'','',''});
+        ylabel(measureNames{i});
+
+        % label the bar groups
+        set(gca,'xticklabel', aux);
     end
     
-    % label the bar groups
-    set(gca,'xticklabel', {'','',''});
+
     
     
     % make legend
@@ -55,7 +66,8 @@ function PlotMeasuresStd(patientnr, nightnrs, aux, measureNames)
     for night = 1:length(nightnrs)
         legendstr{night} = ['Night ' int2str(night)];
     end    
-    legend(legendstr, 'Location', 'SouthEast');
-    set(gca,'FontSize',20)
+    %legend(legendstr, 'Location', 'SouthEast');
+
+    
 end
 

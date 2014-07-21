@@ -1,7 +1,10 @@
-function PlotMeasures(patientnr, nightnrs, aux, measureNames)
+function PlotMeasures(patientnr, nightnrs, aux)
 
     % Plots the measures for the given patient and night and filename ending.
-    % Example measures: {'meanclustering', 'maxclustering', 'modularity'}
+    measureNames = {'meanclustering', 'maxclustering', 'stdclustering', ...
+        'modularity', 'globalEfficiency', 'pathlen',...
+        'meanbetweenness', 'maxbetweenness', 'stdbetweenness', ...
+        'meanparticipation', 'maxparticipation', 'stdparticipation'};
     
     LoadFolderNames;
     
@@ -14,8 +17,8 @@ function PlotMeasures(patientnr, nightnrs, aux, measureNames)
         patientName = ['p' int2str(patientnr) '_overnight' int2str(nightnrs(night)) '_' aux];
 
         % load measures & info
-        load([measuresFolder 'measures_' patientName]);
-        load([measuresFolder 'info_' patientName]);
+        load([folderMeasures 'measures_' patientName]);
+        load([folderMeasures 'info_' patientName]);
 
         % initialize
         nrEpochs = length(measures);
@@ -27,17 +30,21 @@ function PlotMeasures(patientnr, nightnrs, aux, measureNames)
         for i = 1:length(measureNames)
             y{night,i} = zeros(1,nrEpochs);
             for j = 1:nrEpochs
-                y{night,i}(j) = measures{j}.(measureNames{i});
+                    
+                try
+                    y{night,i}(j) = measures{j}.(measureNames{i});
+                catch
+                    y{night,i}(j) = NaN;
+                end
             end
         end
         
     end
     
     % plot each measure value over time
-    
-    %suptitle(['Patient ' int2str(patientnr) ' - ' aux ' band']);
     h = figure;
-    set(h, 'Position', [0 0 300 800]);
+    set(h, 'Position', [0 0 1000 5000]);
+    suptitle(['Patient ' int2str(patientnr) ' - ' aux ' band']);
     
     for i = 1:length(measureNames)
         subplot(length(measureNames),1,i);        
@@ -49,19 +56,19 @@ function PlotMeasures(patientnr, nightnrs, aux, measureNames)
         end
         
         if(i == 1)
-            ylim([0 0.3]);
+            %ylim([0 0.3]);
         end
         if(i == 3)
-            ylim([40 90]);
+            %ylim([40 90]);
         end
         if(i == 4)
-            ylim([0 0.25]);
+            %ylim([0 0.25]);
         end
-        %ylabel(measureNames{i});
+        ylabel(measureNames{i});
         hold off
     end
     
-    %xlabel('Time (hours)');
+    xlabel('Time (hours)');
     
     
     % make legend
@@ -70,6 +77,10 @@ function PlotMeasures(patientnr, nightnrs, aux, measureNames)
         legendstr{night} = ['Night ' int2str(night)];
     end
     %legend(legendstr);
+    
+    set(gcf, 'PaperType', 'E', 'PaperPosition', [0 0 10 70]);
+    set(gcf, 'Visible', 'off');
+    print(h, '-djpeg', '-r350', [folderFigures 'figure_p' num2str(patientnr) '_' aux '.jpg']);
   
 end
 

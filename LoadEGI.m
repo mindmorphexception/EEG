@@ -6,7 +6,7 @@ function eeglabSet = LoadEGI(patientnr, nightnr, hour1, hour2)
     LoadParams;
     
     % get file index in the data array
-    index = GetFileIndex(patientnr, nightnr);   
+    index = GetPatientIndex(patientnr, nightnr);   
     
     % get filename
     filename = data{index,1};
