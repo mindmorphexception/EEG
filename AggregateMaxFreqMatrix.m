@@ -42,7 +42,7 @@ function [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr,
         end
 
         matrices{t} = crtMatrix;
-        maxFreq(logical(eye(length(crtMatrix)))) = 0;
+        maxFreq(logical(eye(length(crtMatrix)))) = 0; % sets diagonal to 0
         maxFrequencies{t} = maxFreq;
         ft_progress(t/nrEpochs);
     end

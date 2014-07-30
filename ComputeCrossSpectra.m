@@ -66,9 +66,9 @@ function ProcessFile(i)
             error('too small sampling rate');
         end
 
-        % filter data above 0.09 Hz
-        % eeglabSet = pop_eegfilt(eeglabSet,0,35);
-        % eeglabSet = pop_eegfilt(eeglabSet,0.09,0);
+        % filter data between 0.05 and 21 Hz
+        % eeglabSet = pop_eegfilt(eeglabSet,0,21);
+        % eeglabSet = pop_eegfilt(eeglabSet,1,0);
         
         % create events for epoching
         nrEpochs = floor ( length(eeglabSet.times) / epochSizeSamples );
@@ -92,7 +92,7 @@ function ProcessFile(i)
         for e = 1:eeglabSet.trials
             
             if (sum(noisiness(:,e)) > 0 && ... % if there are any bad channels
-                sum(noisiness(:,e)) < thresholdBadChansPerEpochs * eeglabSet.nbchan) % and not all chans are bad
+                sum(noisiness(:,e)) <= thresholdBadChansPerEpochs * eeglabSet.nbchan) % and not too many chans are bad
                 
                 % make a new eeglabset
                 epochSet = [];

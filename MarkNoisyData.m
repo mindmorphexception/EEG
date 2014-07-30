@@ -1,5 +1,5 @@
 function [stddevs, noisinessMatrix] = MarkNoisyData(patientnr, nightnr)
- 
+    
     LoadFolderNames;
     LoadParams;
    

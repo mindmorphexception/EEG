@@ -1,5 +1,8 @@
 function PlotPowerSpectraAvgOverTime(patientnr, nightnr, channelStr)
-
+    
+    % channel string example: 'E61'
+    % if channel string is '', the mean is calculated
+    
     % input folder
     LoadFolderNames;
     

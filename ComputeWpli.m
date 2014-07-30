@@ -23,6 +23,8 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
     mymatrix = cell(length(freqStruct.freq), nrWindows);
     fprintf('Expecting %d windows\n', length(connectivityStruct));
     nr_freq = length(freqStruct.freq);
+    thresholdBadChansPerEpoch = GetThresholdBadChansPerEpoch(patientnr, nightnr) * size(noisiness,1);
+    thresholdBadEpochsPerWpli = GetThresholdBadEpochsPerWpli(patientnr, nightnr) * processingWindow;
     
     % make a new freq struct as a template for wpli function calls
     crtFreqStruct.label = freqStruct.label;
@@ -60,7 +62,6 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
         
         % skip bad epochs from the calculation
         nrBadEpochs = 0;
-        thresholdBadChansPerEpoch = GetThresholdBadChansPerEpoch(patientnr, nightnr) * size(noisiness,1);
         for e = firstEpoch:lastEpoch
             if sum(noisiness(:,e)) > thresholdBadChansPerEpoch
                 crtFreqStruct2.powspctrm(e - nrBadEpochs - firstEpoch + 1,:,:) = [];
@@ -73,7 +74,7 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
         
         % skip calculating the current wpli if too many epochs are bad
         calcWpli = 1;
-        if nrBadEpochs > GetThresholdBadEpochsPerWpli(patientnr, nightnr) * processingWindow
+        if nrBadEpochs > thresholdBadEpochsPerWpli
             calcWpli = 0;
         else
             % do connectivity analysis => debiased phase lag index
