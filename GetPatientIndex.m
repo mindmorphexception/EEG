@@ -4,7 +4,12 @@ function index = GetPatientIndex(patientnr, nightnr)
 
     LoadFolderNames;
     index = -1;
-    str = ['p' num2str(patientnr) '_overnight' num2str(nightnr)];
+    if(environment ~= 4)
+        str = ['p' num2str(patientnr) '_overnight' num2str(nightnr)];
+    else
+        str = [ sprintf('%02d',patientnr) '-2010-anest'];
+    end
+    
     for i = 1:length(data)
         if(strfind(data{i},str) == 1)
             index = i;

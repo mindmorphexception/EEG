@@ -1,5 +1,11 @@
 function [stddevs, noisinessMatrix] = MarkNoisyData(patientnr, nightnr)
     
+%     AddPaths;
+%     eeglab;
+%     clearvars -except patientnr nightnr;
+     
+    fprintf('*** Java memory is %f\n', java.lang.Runtime.getRuntime.maxMemory / (2^30));   
+
     LoadFolderNames;
     LoadParams;
    

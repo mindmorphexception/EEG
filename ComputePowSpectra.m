@@ -92,7 +92,7 @@ function ProcessFile(i)
         for e = 1:eeglabSet.trials
             
             if (sum(noisiness(:,e)) > 0 && ... % if there are any bad channels
-                sum(noisiness(:,e)) < thresholdBadChansPerEpochs * eeglabSet.nbchan) % and not all chans are bad
+                sum(noisiness(:,e)) <= thresholdBadChansPerEpochs * eeglabSet.nbchan) % and not all chans are bad
                 
                 % make a new eeglabset
                 epochSet = [];

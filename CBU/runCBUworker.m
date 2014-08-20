@@ -1,15 +1,15 @@
 clear
 clc
 j = 0;
-jobnrs = [3 4 5 7 8 9 11 13 15 16 17 18 19 22 23 24 25 26 27 28 29 30];
-
+jobnrs = [1:28];
 LoadFolderNames;
-for i = 1:length(jobnrs)
-
+for i = 1:28
+    [patientnr, nightnr] = GetPatientNightNr(i);
+        
     j = j+1;
-    jobs(j).task=str2func('ComputeCrossSpectra'); % create a function handle for the current task
+    jobs(j).task=str2func('ComputeBandPowerContributions'); % create a function handle for the current task
     jobs(j).n_return_values=0;
-    jobs(j).input_args = {jobnrs(i)};
+    jobs(j).input_args = {patientnr, nightnr};
     
 end
 
@@ -26,7 +26,7 @@ mypaths = { '/home/sc03/Iulia/Iulia', ...
      '/home/sc03/Iulia/eeglab'};
 
 clear scheduler;
-scheduler=cbu_scheduler('custom',{'compute',4,92,18000});
+scheduler=cbu_scheduler('custom',{'compute',8,16,1800,'/imaging/sc03/Iulia/_cbu-cluster-outputs'});
 
 cbu_qsub(jobs,scheduler,mypaths);
 

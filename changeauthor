@@ -1,0 +1,19 @@
+#!/bin/sh
+ 
+git filter-branch --env-filter '
+ 
+an="$GIT_AUTHOR_NAME"
+cn="$GIT_COMMITTER_NAME"
+ 
+if [ "$GIT_COMMITTER_NAME" = "Srivas Chennu" ]
+then
+cn="Iulia (CBU)"
+fi
+if [ "$GIT_AUTHOR_NAME = "Srivas Chennu" ]
+then
+an="Iulia (CBU)"
+fi
+ 
+export GIT_AUTHOR_NAME="$an"
+export GIT_COMMITTER_NAME="$cn"
+'

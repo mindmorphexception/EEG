@@ -1,6 +1,6 @@
 function findCBUerrorJobs()
 
-    folder = '/imaging/sc03/.cbu-cluster/matlab-jobs_r2012a_onwards/';
+    folder = '/imaging/sc03/Iulia/_cbu-cluster-outputs/';
     
     d = dir(folder);
     

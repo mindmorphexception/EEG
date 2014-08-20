@@ -96,7 +96,7 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
     for freqIndex = 1:nr_freq
         freq = freqStruct.freq(freqIndex);
         matrix = mymatrix(freqIndex,:);
-        save([folderMatrix 'matrix_' basename '_' num2str(freq) 'hz.mat'], 'matrix');
+        save([folderMatrix 'matrix_p' num2str(patientnr) '_overnight' num2str(nightnr) '_' num2str(freq) 'hz.mat'], 'matrix');
         ft_progress(freqIndex/nr_freq);
     end 
     ft_progress('close');

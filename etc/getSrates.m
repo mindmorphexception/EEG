@@ -30,5 +30,5 @@ end
 
 fprintf('Sampling rates:\n');
 for i = 1:length(files)
-    fprintf('{''%s''}, 1, %d, %d;\n', files(i).name, nrSamples(i), srate(i));
+    fprintf('{''%s''}, 1, %d, %d,\t 250, 0.1, 0.1;\n', files(i).name, nrSamples(i), srate(i));
 end
