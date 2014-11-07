@@ -24,7 +24,7 @@ function ProcessFile(i)
     
     % construct the first and last samples to read from file
     fileFirstSample = data{i,2};
-    fileLastSample = data{i,3};
+    fileLastSample = 250 * 60 * 15; %data{i,3};
     
     % don't process if cleaning thresholds not set
     if isnan(data{i,5})
@@ -36,8 +36,8 @@ function ProcessFile(i)
     thresholdChannelStdDev = data{i,5};
     thresholdBadChansPerEpochs = data{i,6};
     
-    % load stddevs and noisiness
-    [~, noisiness] = MarkNoisyData(patientnr, nightnr);
+%    % load stddevs and noisiness
+%    [~, noisiness] = MarkNoisyData(patientnr, nightnr);
     
     fprintf('Reading %f hours of file %s\n', (fileLastSample - fileFirstSample + 1) / (actualSrate * 60 * 60), filename);
 
@@ -87,42 +87,42 @@ function ProcessFile(i)
         fprintf('*** Epoching...\n');
         eeglabSet = pop_epoch(eeglabSet, {EPOCH_EVENT_NAME}, [0 epochSizeSeconds]);
         
-        % interpolate noisy channels in each epoch
-        fprintf('*** Interpolating... (field ordering error is not important)\n');
-        for e = 1:eeglabSet.trials
-            
-            if (sum(noisiness(:,e)) > 0 && ... % if there are any bad channels
-                sum(noisiness(:,e)) <= thresholdBadChansPerEpochs * eeglabSet.nbchan) % and not all chans are bad
-                
-                % make a new eeglabset
-                epochSet = [];
-                epochSet.setname = ['Set for epoch ' num2str(e)];
-                epochSet.srate = eeglabSet.srate;
-                epochSet.nbchan = eeglabSet.nbchan;
-                epochSet.times = eeglabSet.times;
-                epochSet.trials = 1;
-                epochSet.event = [];
-                epochSet.xmin = eeglabSet.xmin;
-                epochSet.xmax = eeglabSet.xmax;
-                epochSet.chanlocs = eeglabSet.chanlocs;
-                epochSet.chaninfo = eeglabSet.chaninfo;
-                epochSet.data = eeglabSet.data(:,:,e);
-                epochSet.etc = [];
-                epochSet.icaact = [];
-                epochSet.epoch = [];
-                epochSet.specdata = [];
-                epochSet.icachansind = [];
-                epochSet.icawinv = [];
-                epochSet.specicaact = [];
-                epochSet.icasphere = [];
-                epochSet.specicaact = [];
-                epochSet.icaweights = [];
-                
-                % interpolate
-                epochSet = pop_interp(epochSet, find(noisiness(:,e) > 0), 'spherical');
-                eeglabSet.data(:,:,e) = epochSet.data;
-            end
-        end
+%         % interpolate noisy channels in each epoch
+%         fprintf('*** Interpolating... (field ordering error is not important)\n');
+%         for e = 1:eeglabSet.trials
+%             
+%             if (sum(noisiness(:,e)) > 0 && ... % if there are any bad channels
+%                 sum(noisiness(:,e)) <= thresholdBadChansPerEpochs * eeglabSet.nbchan) % and not all chans are bad
+%                 
+%                 % make a new eeglabset
+%                 epochSet = [];
+%                 epochSet.setname = ['Set for epoch ' num2str(e)];
+%                 epochSet.srate = eeglabSet.srate;
+%                 epochSet.nbchan = eeglabSet.nbchan;
+%                 epochSet.times = eeglabSet.times;
+%                 epochSet.trials = 1;
+%                 epochSet.event = [];
+%                 epochSet.xmin = eeglabSet.xmin;
+%                 epochSet.xmax = eeglabSet.xmax;
+%                 epochSet.chanlocs = eeglabSet.chanlocs;
+%                 epochSet.chaninfo = eeglabSet.chaninfo;
+%                 epochSet.data = eeglabSet.data(:,:,e);
+%                 epochSet.etc = [];
+%                 epochSet.icaact = [];
+%                 epochSet.epoch = [];
+%                 epochSet.specdata = [];
+%                 epochSet.icachansind = [];
+%                 epochSet.icawinv = [];
+%                 epochSet.specicaact = [];
+%                 epochSet.icasphere = [];
+%                 epochSet.specicaact = [];
+%                 epochSet.icaweights = [];
+%                 
+%                 % interpolate
+%                 epochSet = pop_interp(epochSet, find(noisiness(:,e) > 0), 'spherical');
+%                 eeglabSet.data(:,:,e) = epochSet.data;
+%             end
+%         end
         
         % rereference
         fprintf('*** Rereferencing...\n');

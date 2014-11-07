@@ -48,13 +48,17 @@ elseif(environment == 3) % ============== MRC-CBU (Srivas) ============== %
     %javaaddpath(which('/Volumes/home/imc31/matlab/fieldtrip/external/egi_mff/java/MFF-1.2.jar'));
     % data folder
     folderData = '/imaging/sc03/Overnight/';
+    % Fourier transforms folder
+    folderFourier = '/imaging/sc03/Iulia/Overnight/fourier/';
     % power spectra folder
     folderPowspec = '/imaging/sc03/Iulia/Overnight/power-spectra/';
+    % folder for power spectra with unclean epochs removed
+    folderPowspecClean = '/imaging/sc03/Iulia/Overnight/power-spectra-clean/';
     % cross spectra folder
     folderCrossSpectra = '/imaging/sc03/Iulia/Overnight/cross-spectra/';
     % chanlocs filepath
     chanlocsPath = '/home/sc03/Iulia/Iulia/chanlocs';
-    %matrixFolder
+    % matrix folder
     folderMatrix = '/imaging/sc03/Iulia/Overnight/matrix/';
     % measures folder
     folderMeasures = '/imaging/sc03/Iulia/Overnight/measures/';
@@ -63,29 +67,47 @@ elseif(environment == 3) % ============== MRC-CBU (Srivas) ============== %
     %std dev folder
     folderStdDev = '/imaging/sc03/Iulia/Overnight/stddev/';
     % pow contributions folder
-    folderPowContributions = '/imaging/sc03/Iulia/Overnight/power-contributions/';
+    folderPowContributions = '/imaging/sc03/Iulia/Overnight/power-contributions-selected-band-chans/';
+    % figures for band power folder
+    folderFiguresPower = '/imaging/sc03/Iulia/Overnight/figures-power/';
+    % folder where global coherence is saved
+    folderFiguresGlobalCoherence = '/imaging/sc03/Iulia/Overnight/figures-global-coherence/';
+    % folder where global coherence figures are saved
+    folderGlobalCoherence = '/imaging/sc03/Iulia/Overnight/global-coherence/';
     
-elseif(environment == 4)  % ============== Falling asleep / MRC-CBU (Srivas) ============== %
+    
+elseif(environment == 4)  % ============== Sedation / MRC-CBU (Srivas) ============== %
     % add java path
     javaaddpath(which('MFF-1.2.jar'));
     % data folder
-    folderData = '/imaging/sc03/Iulia/Tristan_anes/Data/';
+    folderData = '/imaging/sc03/Iulia/Sedation/Data/';
     % power spectra folder
-    folderPowspec = '/imaging/sc03/Iulia/Tristan_anes/power-spectra/';
+    folderPowspec = '/imaging/sc03/Iulia/Sedation/power-spectra/';
+    % folder for pow spectra from interpolated data
+    folderPowspecClean = '/imaging/sc03/Iulia/Sedation/power-spectra-clean/';
+    % power spectra folder
+    folderFourier = '/imaging/sc03/Iulia/Sedation/fourier/';
     % cross spectra folder
-    folderCrossSpectra = '/imaging/sc03/Iulia/Tristan_anes/cross-spectra/';
+    folderCrossSpectra = '/imaging/sc03/Iulia/Sedation/cross-spectra/';
     % chanlocs filepath
-    chanlocsPath = '/home/sc03/Iulia/Iulia/chanlocs_tris_';
+    chanlocsPath = '/home/sc03/Iulia/Iulia/chanlocs_sedation_';
     %matrixFolder
-    folderMatrix = '/imaging/sc03/Iulia/Tristan_anes/matrix/';
+    folderMatrix = '/imaging/sc03/Iulia/Sedation/matrix/';
     % measures folder
-    folderMeasures = '/imaging/sc03/Iulia/Tristan_anes/measures/';
+    folderMeasures = '/imaging/sc03/Iulia/Sedation/measures/';
     % figures folder
-    folderFigures = '/imaging/sc03/Iulia/Tristan_anes/figures/';
+    folderFigures = '/imaging/sc03/Iulia/Sedation/figures/';
     %std dev folder
-    folderStdDev = '/imaging/sc03/Iulia/Tristan_anes/stddev/';
+    folderStdDev = '/imaging/sc03/Iulia/Sedation/stddev/';
     % pow contributions folder
-    folderPowContributions = '/imaging/sc03/Iulia/Tristan_anes/power-contributions/';
+    folderPowContributions = '/imaging/sc03/Iulia/Sedation/power-contributions-selected-band-chans/';
+    % figures for band power folder
+    folderFiguresPower = '/imaging/sc03/Iulia/Sedation/figures-power/';
+    % folder where global coherence is saved
+    folderFiguresGlobalCoherence = '/imaging/sc03/Iulia/Sedation/figures-global-coherence/';
+    % folder where global coherence figures are saved
+    folderGlobalCoherence = '/imaging/sc03/Iulia/Sedation/global-coherence/';
+    
 end
 
 % {filename firstsample lastsample} mark data where there are no events

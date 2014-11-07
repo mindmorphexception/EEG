@@ -1,6 +1,8 @@
 function measures = ComputeGraphMeasuresCore(matrix)
 
     nrNodes = length(matrix);
+    
+    % mean degree
 
     % clustering coefficient
     measures.clustering = clustering_coef_wu(matrix);

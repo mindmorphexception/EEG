@@ -142,6 +142,8 @@ function ProcessFile(i)
         fprintf('*** Performing freqanalysis...\n');
        
         freqStruct = ft_freqanalysis(freqCfg, fieldtripSet);
+        
+        %save([folderCrossSpectra 'cross_spectra_p' int2str(patientnr) '_overnight' int2str(nightnr)], 'freqStruct');
         ComputeWpli(freqStruct, filename(1:length(filename)-14), patientnr, nightnr);
 
         %freqStruct.totalEpochs = floor((fileLastSample - fileFirstSample + 1) / (epochSizeSamples * (actualSrate / srate)) );

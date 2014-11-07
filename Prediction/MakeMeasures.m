@@ -1,119 +1,73 @@
-function measures = MakeMeasures(measureName, night, patients)
+function [means, stddevs] = MakeMeasures(measureName, night, patients)
 
 %   Supported measures:
-%   alpha-var (variance of percent contribution from alpha band)
-%   theta-var
-%   delta-var
-%   alpha-theta-ratio-median (median of ratio between percent contribution from alpha and percent contribution from theta)
-%   alpha-delta-ratio-median
-%   theta-delta-ratio-median
-%   alpha-median (median of percent contribution from alpha band)
-%   theta-median
-%   delta-median
-%   alpha-theta-ratio-var (variance of ratio between percent contribution from alpha and percent contribution from theta)
-%   alpha-delta-ratio-var
-%   theta-delta-ratio-var
+%   alpha-contrib (mean and variance of percent contribution from alpha band)
+%   theta-contrib
+%   delta-contrib
+%   alpha-theta-ratio (mean of ratio between percent contribution from alpha and percent contribution from theta)
+%   alpha-delta-ratio
+%   theta-delta-ratio
 
-    measures = zeros(1,length(patients));
+    means = zeros(1,length(patients));
+    stddevs = zeros(1,length(patients));
     nrsamples = zeros(1,length(patients));
 
     switch(measureName)
-        case 'alpha-var'
+        case 'alpha-contrib'
             for p = 1:length(patients)
                 percentAlpha = GetPowerContributionAlpha(patients(p),night);
-                measures(p) = std(percentAlpha);
+                stddevs(p) = std(percentAlpha);
+                means(p) = mean(percentAlpha);
                 nrsamples(p) = length(percentAlpha);
             end
             
-        case 'theta-var'
+        case 'theta-contrib'
             for p = 1:length(patients)
                 percentTheta = GetPowerContributionTheta(patients(p),night);
-                measures(p) = std(percentTheta);
+                stddevs(p) = std(percentTheta);
+                means(p) = mean(percentTheta);
                 nrsamples(p) = length(percentTheta);
             end
             
-        case 'delta-var'
+        case 'delta-contrib'
             for p = 1:length(patients)
                 percentDelta = GetPowerContributionDelta(patients(p),night);
-                measures(p) = std(percentDelta);
+                stddevs(p) = std(percentDelta);
+                means(p) = mean(percentDelta);
                 nrsamples(p) = length(percentDelta);
             end
-            
-        case 'alpha-median'
-            for p = 1:length(patients)
-                percentAlpha = GetPowerContributionAlpha(patients(p),night);
-                measures(p) = median(percentAlpha);
-                nrsamples(p) = length(percentAlpha);
-            end
-            
-        case 'theta-median'
-            for p = 1:length(patients)
-                percentTheta = GetPowerContributionTheta(patients(p),night);
-                measures(p) = median(percentTheta);
-                nrsamples(p) = length(percentTheta);
-            end
-            
-        case 'delta-median'
-            for p = 1:length(patients)
-                percentDelta = GetPowerContributionDelta(patients(p),night);
-                measures(p) = median(percentDelta);
-                nrsamples(p) = length(percentDelta);
-            end
-            
           
-        case 'alpha-theta-ratio-median'
+        case 'alpha-theta-ratio'
             for p = 1:length(patients)
                 percentTheta = GetPowerContributionTheta(patients(p),night);
                 percentAlpha = GetPowerContributionAlpha(patients(p),night);
                 ratio = percentAlpha ./ percentTheta;
-                measures(p) = median(ratio);
+                stddevs(p) = std(ratio);
+                means(p) = mean(ratio);
                 nrsamples(p) = length(ratio);
             end
             
-        case 'alpha-delta-ratio-median'
+        case 'alpha-delta-ratio'
             for p = 1:length(patients)
                 percentDelta = GetPowerContributionDelta(patients(p),night);
                 percentAlpha = GetPowerContributionAlpha(patients(p),night);
                 ratio = percentAlpha ./ percentDelta;
-                measures(p) = median(ratio);
+                stddevs(p) = std(ratio);
+                means(p) = mean(ratio);
                 nrsamples(p) = length(ratio);
             end
             
-        case 'theta-delta-ratio-median'
+        case 'theta-delta-ratio'
             for p = 1:length(patients)
                 percentTheta = GetPowerContributionTheta(patients(p),night);
                 percentDelta = GetPowerContributionDelta(patients(p),night);
                 ratio = percentTheta ./ percentDelta;
-                measures(p) = median(ratio);
+                stddevs(p) = std(ratio);
+                means(p) = mean(ratio);
                 nrsamples(p) = length(ratio);
             end
             
-        case 'alpha-theta-ratio-var'
-            for p = 1:length(patients)
-                percentTheta = GetPowerContributionTheta(patients(p),night);
-                percentAlpha = GetPowerContributionAlpha(patients(p),night);
-                ratio = percentAlpha ./ percentTheta;
-                measures(p) = std(ratio);
-                nrsamples(p) = length(ratio);
-            end
-            
-        case 'alpha-delta-ratio-var'
-            for p = 1:length(patients)
-                percentDelta = GetPowerContributionDelta(patients(p),night);
-                percentAlpha = GetPowerContributionAlpha(patients(p),night);
-                ratio = percentAlpha ./ percentDelta;
-                measures(p) = std(ratio);
-                nrsamples(p) = length(ratio);
-            end
-            
-        case 'theta-delta-ratio-var'
-            for p = 1:length(patients)
-                percentTheta = GetPowerContributionTheta(patients(p),night);
-                percentDelta = GetPowerContributionDelta(patients(p),night);
-                ratio = percentTheta ./ percentDelta;
-                measures(p) = std(ratio);
-                nrsamples(p) = length(ratio);
-            end
+      
             
         otherwise
             error('Unknown measure name.')

@@ -3,9 +3,10 @@ srate = 250;
 cooldown = 30 * 60 * srate; % only read 30 minutes after stimulation (second value in the data)
 epochSizeSeconds = 10; % split data into epochs of 10 seconds
 epochSizeSamples = epochSizeSeconds * srate; % the number of samples per epoch
-processingWindow = 60; % calculate wpli for groups of 60 epochs (60*10 seconds = 10 minutes)
-windowOverlap = 30; % 30 epochs (5 minutes) forward step between wpli groups
+processingWindow = 10; % calculate wpli for groups of 10 epochs (10*10 seconds)
+windowOverlap = 5; % 30 epochs (5 minutes) forward step between wpli groups
 fileChunkSamples = 26000000; % how many samples to read from file at one time
+globalCoherenceWindow = 6; % calculate global coherence for windows of 6 epochs (i.e. 1 minute)
 
 % excluded chans
 chanExcluded = [1,8,14,17,21,25,32,38,43,44,48,49,56,63,64,68,69,73,74,81,82,88,89,94,95,99,107,113,114,119,120,121,125,126,127,128];
