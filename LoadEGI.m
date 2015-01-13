@@ -1,9 +1,9 @@
-function eeglabSet = LoadEGI(patientnr, nightnr, hour1, hour2, filter_and_rereference)
+function eeglabSet = LoadEGI(patientnr, nightnr, filename, hour1, hour2, filter_and_rereference)
     % hour1 is the time in hours where to start reading
     % hour2 is the time in hours where to end reading
     % pass hour2 as 0 to read the whole file
 
-    LoadFolderNames;
+    %LoadFolderNames;
     LoadParams;
     
     % get file index in the data array
@@ -39,7 +39,7 @@ function eeglabSet = LoadEGI(patientnr, nightnr, hour1, hour2, filter_and_rerefe
     
     if(filter_and_rereference)
         % filter data between 1 and 40 Hz
-        eeglabSet = pop_eegfilt(eeglabSet,0,40);
+        eeglabSet = pop_eegfilt(eeglabSet,0,45);
         eeglabSet = pop_eegfilt(eeglabSet,1,0);
         
         % rereference

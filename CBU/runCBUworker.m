@@ -1,35 +1,16 @@
 clear
 clc
 j = 0;
-jobnrs = [1:23];
+jobnrs = [16 17 23];
 LoadFolderNames;
-for i = 24:28
+for i = 1:28
     [patientnr, nightnr] = GetPatientNightNr(i);
 
     j = j+1;
-    jobs(j).task=str2func('PlotGlobalCoherence'); % create a function handle for the current task
+    jobs(j).task=str2func('ComputeCrossSpectra'); % create a function handle for the current task
     jobs(j).n_return_values=0;
-    jobs(j).input_args = {patientnr, nightnr, 1};
-
-    
-%      j = j+1;
-%      jobs(j).task=str2func('bandpower'); % create a function handle for the current task
-%      jobs(j).n_return_values=0;
-%      jobs(j).input_args = {'16', 'E11', [8 12]};%{patientnr, nightnr, [1:0.1:4], [0.3:0.05:0.5], 'delta'};
-%  
-%     j = j+1;
-%     jobs(j).task=str2func('calcspec'); % create a function handle for the current task
-%     jobs(j).n_return_values=0;
-%     jobs(j).input_args = {'16'};%{patientnr, nightnr, [1:0.1:4], [0.3:0.05:0.5], 'delta'};
-%     
-      
-%     j = j+1;
-%     jobs(j).task=str2func('SteinversionComputeCrossSpectra'); % create a function handle for the current task
-%     jobs(j).n_return_values=0;
-%     jobs(j).input_args = {16};%{patientnr, nightnr, [1:0.1:4], [0.3:0.05:0.5], 'delta'};
-%     
-
-    
+    jobs(j).input_args = {i};
+   
 end
 
 mypaths = { '/home/sc03/Iulia/Iulia', ...
@@ -46,7 +27,7 @@ mypaths = { '/home/sc03/Iulia/Iulia', ...
      };
 
 clear scheduler;
-scheduler=cbu_scheduler('custom',{'compute',2,8,6400,'/imaging/sc03/Iulia/_cbu-cluster-outputs'});
+scheduler=cbu_scheduler('custom',{'compute',12,128,100000,'/imaging/sc03/Iulia/_cbu-cluster-outputs'});
 
 cbu_qsub(jobs,scheduler,mypaths);
 

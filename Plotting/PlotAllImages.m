@@ -3,8 +3,13 @@ function maxFrequencies = PlotAllImages(patientnr, nightnr, freq, description)
     % in the patient's folder
     % freq = array of hz vals like [8 8.1 8.2 8.3 ... 9.8]
     
-    [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr, freq);
+    
+
+    % load chanlocs
+    LoadChanLocs;
     LoadFolderNames;
+    
+    [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr, freq);
     
     % output folder
     folder_figures = [folderFigures 'wplitopo_' 'p' int2str(patientnr) '_overnight' int2str(nightnr) '_' description '/'];
@@ -12,37 +17,54 @@ function maxFrequencies = PlotAllImages(patientnr, nightnr, freq, description)
         mkdir(folder_figures);
     end
     
-    LoadParams;
+    fprintf('Number of time frames is %d\n', length(matrices));
 
-    % load chanlocs
-    load([chanlocsPath '91.mat']);
+    history1 = [];
+    history2 = [];
     
-    % progress bar
-    ft_progress('init', 'text', '');
-    for t = 12:12%length(matrices)
-        
-        ft_progress(t/length(matrices), 'Drawing figure %d/%d', t, length(matrices));
-        
+    history_vsize1 = [];
+    history_vsize2 = [];
+    colormap = rand(length(matrices{1}),3);
+    
+    ft_progress('init', 'text', 'Drawing figures...');
+    for t = 1:length(matrices)
+        ft_progress(t/length(matrices));
         if(isnan(matrices{t}))
-            figure;
+            h = figure;
             showaxes('off');
             box('off');
             axis('off');
         else
-            % plot but not visible
-            plotgraph(matrices{t},chanlocs91,'plotqt',0.9,'visible',0);
-            set(get(gca, 'Title'), 'visible', 'on');
+            
+            % plot
+            h = figure;
+            
+            subplot(1,3,1);
+            [~] = plotgraph(matrices{t},chanlocs91, [], [], colormap, {}, 'legend', 'off', 'plotqt', 0.95,'visible',0);
+            set(get(gca, 'Title'), 'visible', 'on'); title('Louvain - no history');
+
+            subplot(1,3,2);
+            [history1, history_vsize1] = plotgraph(matrices{t},chanlocs91, history1, history_vsize1, colormap, {'similarityProportional', 'proportionCommonNodes'}, 'legend', 'off', 'plotqt', 0.95,'visible',0);
+            set(get(gca, 'Title'), 'visible', 'on'); title('Louvain - proportional similarity');
+
+            subplot(1,3,3);
+            [history2, history_vsize2] = plotgraph(matrices{t},chanlocs91, history2, history_vsize2, colormap, {'similarityWeighted', 'proportionCommonNodes'}, 'legend', 'off', 'plotqt', 0.95,'visible',0);
+            set(get(gca, 'Title'), 'visible', 'on'); title('Louvain - weighted similarity');
+
+            
+
         end
         
         % display time limits in title
-        t1 = (windowOverlap*(t-1))*epochSizeSeconds;
-        t2 = t1 + epochSizeSeconds*processingWindow;
-        title(['P' int2str(patientnr) ' overnight' int2str(nightnr) ' seconds ' int2str(t1) ' to ' int2str(t2) ' ' description 'band']);
-        
+        %t1 = (windowOverlap*(t-1))*epochSizeSeconds;
+        %t2 = t1 + epochSizeSeconds*processingWindow;
+        suptitle(['P' int2str(patientnr) ' ' description ' band']);
+
         % save figure
-        saveas(gcf,[folder_figures int2str(t) '.jpg']);
+        print(h, '-djpeg', '-r350', [folder_figures int2str(t) '.jpg']);
+        %saveas(gcf,[folder_figures int2str(t) '.jpg']);
         close;
     end
     ft_progress('close');
-    
+    fprintf('Done.\n');
 end

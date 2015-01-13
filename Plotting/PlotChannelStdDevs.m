@@ -6,11 +6,14 @@ function [stddevs,t,noisinessMatrix] = PlotChannelStdDevs(patientnr, nightnr)
         t1 = MakeTimeLabelsCrossSpectraEpochs(size(stddevs,2));
         nrEpochs = length(t1);
         plot(t1, stddevs, 'Color', 'r');
+        xlabel('Time');
+        ylabel('Std. dev.');
         
         % plot threshold
         hold all
         thresholdChanStdDev = GetThresholdChannelStdDev(patientnr, nightnr);
         plot(xlim, [thresholdChanStdDev thresholdChanStdDev], 'Color', [0 0 0]);
+        
      
 
         % channels over time

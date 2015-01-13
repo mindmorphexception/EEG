@@ -18,13 +18,13 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
 
     % initialize things
     nrEpochs = size(freqStruct.crsspctrm, 1); % total nr of epochs
-    nrWindows = floor((nrEpochs - processingWindow)/windowOverlap)+1;
+    nrWindows = floor((nrEpochs - wpliProcessingWindow)/wpliWindowOverlap)+1;
     connectivityStruct = cell(1, nrWindows);
     mymatrix = cell(length(freqStruct.freq), nrWindows);
     fprintf('Expecting %d windows\n', length(connectivityStruct));
     nr_freq = length(freqStruct.freq);
     thresholdBadChansPerEpoch = GetThresholdBadChansPerEpoch(patientnr, nightnr) * size(noisiness,1);
-    thresholdBadEpochsPerWpli = GetThresholdBadEpochsPerWpli(patientnr, nightnr) * processingWindow;
+    thresholdBadEpochsPerWpli = GetThresholdBadEpochsPerWpli(patientnr, nightnr) * wpliProcessingWindow;
     
     % make a new freq struct as a template for wpli function calls
     crtFreqStruct.label = freqStruct.label;
@@ -37,7 +37,7 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
     % validate nr of windows
     fprintf('*** Computing number of windows...\n');
     endOfIndex = 0;
-    for firstEpoch = 1 : windowOverlap : nrEpochs-processingWindow+1
+    for firstEpoch = 1 : wpliWindowOverlap : nrEpochs-wpliProcessingWindow+1
         endOfIndex = endOfIndex+1;
     end
     if(endOfIndex ~= nrWindows)
@@ -49,8 +49,8 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
     warning('off','MATLAB:colon:nonIntegerIndex');
     for index = 1 : endOfIndex
         
-        firstEpoch = 1 + windowOverlap * (index-1);
-        lastEpoch = firstEpoch + processingWindow - 1;
+        firstEpoch = 1 + wpliWindowOverlap * (index-1);
+        lastEpoch = firstEpoch + wpliProcessingWindow - 1;
         fprintf('*** Epochs %d to %d...\n',firstEpoch,lastEpoch);
         
         % update the fields of the struct for this group (window) of epochs
@@ -92,14 +92,12 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
         end
     end
 
-    ft_progress('init', 'text', '*** Saving matrix...');
+    fprintf('*** Saving matrix...');
     for freqIndex = 1:nr_freq
         freq = freqStruct.freq(freqIndex);
         matrix = mymatrix(freqIndex,:);
         save([folderMatrix 'matrix_p' num2str(patientnr) '_overnight' num2str(nightnr) '_' num2str(freq) 'hz.mat'], 'matrix');
-        ft_progress(freqIndex/nr_freq);
     end 
-    ft_progress('close');
 
     fprintf('Done.\n');
 

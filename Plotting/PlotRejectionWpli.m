@@ -1,21 +1,21 @@
-function PlotWpliRejection(patientnr, nightnr)
+function PlotRejectionWpli(patientnr, nightnr)
     
     LoadParams;
     LoadFolderNames;
     
     [~, noisiness] = MarkNoisyData(patientnr, nightnr);
     nrEpochs = size(noisiness, 2);
-    nrWindows = floor((nrEpochs - processingWindow)/windowOverlap)+1;
+    nrWindows = floor((nrEpochs - wpliProcessingWindow)/wpliWindowOverlap)+1;
     
     badEpochs = zeros(1,nrWindows);
     removedEpochs = zeros(1,nrWindows);
     thresholdBadChansPerEpoch = GetThresholdBadChansPerEpoch(patientnr, nightnr) * size(noisiness,1);
-    thresholdBadEpochsPerWpli = GetThresholdBadEpochsPerWpli(patientnr, nightnr) * processingWindow;
+    thresholdBadEpochsPerWpli = GetThresholdBadEpochsPerWpli(patientnr, nightnr) * wpliProcessingWindow;
     
     for index = 1:nrWindows
         
-        firstEpoch = 1 + windowOverlap * (index-1);
-        lastEpoch = firstEpoch + processingWindow - 1;
+        firstEpoch = 1 + wpliWindowOverlap * (index-1);
+        lastEpoch = firstEpoch + wpliProcessingWindow - 1;
         fprintf('*** Epochs %d to %d...\n',firstEpoch,lastEpoch);
         
         % skip bad epochs from the calculation
@@ -35,10 +35,14 @@ function PlotWpliRejection(patientnr, nightnr)
        
     end
     
-    figure;
+    hold on;
     bar(badEpochs);
     hold on;
     bar(removedEpochs,'red');
-    PlotBadChans(patientnr, nightnr);
+    xlabel('Wpli windows');
+    ylabel('Nr. bad windows');
+    ylim([0 12]);
+    set(gca,'ytick',[0:12]);
+    set(gca,'yticklabel',[0:12]);
 end
 

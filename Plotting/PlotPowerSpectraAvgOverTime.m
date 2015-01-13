@@ -11,6 +11,7 @@ function PlotPowerSpectraAvgOverTime(patientnr, nightnr, channelStr)
     
     % load freq struct
     load([folderPowspec filename '.mat']);
+    freqStruct.powspctrm = mag2db(freqStruct.powspctrm);
     
     % find channel index
     channelnr = find(ismember(freqStruct.label,channelStr));
@@ -33,7 +34,6 @@ function PlotPowerSpectraAvgOverTime(patientnr, nightnr, channelStr)
         % calculate mean power at every frequency over time
         power = (squeeze(mean(freqStruct.powspctrm(:,channelnr,:),1)));
     end
-    
     
     plot(freqStruct.freq, power, 'LineWidth', 3);
     xlabel('Frequency (Hz)','FontSize',20);
