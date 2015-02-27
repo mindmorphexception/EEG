@@ -21,7 +21,7 @@ function ComputeFourierTransform(index)
     freqStruct = ft_freqanalysis(freqCfg, fieldtripSet);
 
     % save result
-    save([folderFourier 'fourier_p' int2str(patientnr) '_overnight' int2str(nightnr)], 'freqStruct');
+    save([folderFourier 'fourier_p' int2str(patientnr) '_overnight' int2str(nightnr)], 'freqStruct', '-v7.3');
 
 end
     

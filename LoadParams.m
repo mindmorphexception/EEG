@@ -5,8 +5,9 @@ epochSizeSeconds = 10; % split data into epochs of 10 seconds
 epochSizeSamples = epochSizeSeconds * srate; % the number of samples per epoch
 fileChunkSamples = 7500000000; % how many samples to read from file at one time
 wpliProcessingWindow = 60; % calculate wpli for groups of 60 epochs (10 minutes)
-wpliWindowOverlap = 10; % 10 epochs forward step between wpli groups
+wpliWindowOverlap = 1; % 10 epochs forward step between wpli groups
 globalCoherenceWindow = 10; % calculate global coherence for windows of 10 epochs (i.e. 10*10 seconds)
+globalCoherenceOverlap = 10; % move forward to epochs when calculating global coherence
 
 % excluded chans
 chanExcluded = [1,8,14,17,21,25,32,38,43,44,48,49,56,63,64,68,69,73,74,81,82,88,89,94,95,99,107,113,114,119,120,121,125,126,127,128];
@@ -15,7 +16,7 @@ chanExcluded = [1,8,14,17,21,25,32,38,43,44,48,49,56,63,64,68,69,73,74,81,82,88,
 clear freqCfg;
 freqCfg.method = 'mtmfft';
 freqCfg.output = 'set me!';
-freqCfg.foi = 1:0.1:40; % frequencies of interest
+freqCfg.foi = 1:0.1:18; % frequencies of interest
 freqCfg.keeptrials = 'yes';
 freqCfg.taper = 'hanning';
 %freqCfg.toi = 0:10:100;

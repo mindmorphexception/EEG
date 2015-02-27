@@ -78,6 +78,7 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
             calcWpli = 0;
         else
             % do connectivity analysis => debiased phase lag index
+            save('/imaging/sc03/Iulia/Overnight/crtFreqStrict2.mat','crtFreqStruct2');
             connectivityStruct{index} = ft_connectivityanalysis(connectivityCfg, crtFreqStruct2);
         end
         
@@ -91,12 +92,13 @@ function [connectivityStruct, mymatrix] = ComputeWpli(freqStruct, basename, pati
             end
         end
     end
-
+    
     fprintf('*** Saving matrix...');
+                folderMatrix = '/imaging/sc03/Iulia/Overnight/matrix-extra/';
     for freqIndex = 1:nr_freq
         freq = freqStruct.freq(freqIndex);
         matrix = mymatrix(freqIndex,:);
-        save([folderMatrix 'matrix_p' num2str(patientnr) '_overnight' num2str(nightnr) '_' num2str(freq) 'hz.mat'], 'matrix');
+        save([folderMatrix 'matrix_p' num2str(patientnr) '_overnight' num2str(nightnr) '_' num2str(freq) 'hz.mat'], 'matrix', '-v7.3');
     end 
 
     fprintf('Done.\n');

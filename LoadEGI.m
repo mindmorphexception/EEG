@@ -3,7 +3,7 @@ function eeglabSet = LoadEGI(patientnr, nightnr, filename, hour1, hour2, filter_
     % hour2 is the time in hours where to end reading
     % pass hour2 as 0 to read the whole file
 
-    %LoadFolderNames;
+    LoadFolderNames;
     LoadParams;
     
     % get file index in the data array

@@ -1,6 +1,13 @@
-function newModules = ReassignModules(crtModules, compModules, sortFields, crtNodeWeights, compNodeWeights)
+function [newModules, newModulesSeed] = ReassignModules(crtModules, compModules, sortFields, crtNodeWeights, compNodeWeights, newModulesSeed)
     % Reassigns the module numbers in crtModules attempting to overlap the modules from oldModules.
     % sortFields is a cell of arrays. If empty, it will be {'similarityProportional', 'proportionCommonNodes'}
+    % Node weights can be empty for equal weights.
+    % Modules in crt found in comp will be assigned the number in comp;
+    % new modules will be assigned a number starting from newModulesSeed.
+    % input modules must contain a consecutive numbering.
+    %
+    % Other input values: 'totalNodes','nrCommonNodes','proportionCommonNodes',
+    % 'similarityProportional','similarityWeighted'
     
     
     if isempty(sortFields)
@@ -27,8 +34,8 @@ function newModules = ReassignModules(crtModules, compModules, sortFields, crtNo
     S = nestedSortStruct(S, sortFields, [-1,-1]);
 
     % reassign modules:
-    map = zeros(1, nrNodes);
-    used = zeros(1, nrNodes);
+    map = zeros(1, length(modules));
+    used = [];
     
     for i = 1:length(S)
         if (S(i).(sortFields{1}) <= 0)
@@ -38,22 +45,22 @@ function newModules = ReassignModules(crtModules, compModules, sortFields, crtNo
         prev = S(i).crtModuleNr;
         new = S(i).compModuleNr;
         
-        if(used(new) == 0 && map(prev) == 0)
+        if( isempty(find(used==new)) && map(prev) == 0)
             map(prev) = new;
-            used(new) = 1;
+            used = [used; new];
         end
     end
     
     for i = 1:nrNodes
-        if ( map(i) == 0 )
-            j = 1;
-            while ( used(j) == 1 )
-                j= j + 1;
+        if ( map( crtModules(i) ) == 0 )
+            while (~isempty(find(used == newModulesSeed)))
+                newModulesSeed = newModulesSeed + 1;
             end
-            map(i) = j;
-            used(j) = 1;
+            map( crtModules(i) ) = newModulesSeed;
+            used = [used; newModulesSeed];
         end
     end
+    newModulesSeed = newModulesSeed+1;
     
     newModules = zeros(1, nrNodes);
     for i = 1:nrNodes

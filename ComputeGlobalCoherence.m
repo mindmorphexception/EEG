@@ -1,34 +1,30 @@
 
-function ComputeGlobalCoherence(index)
-% computes global coherence (from Observed Brain Dynamics)
-% saves global coherence, eigenvectors and eigenvals
-
-    [patientnr, nightnr] = GetPatientNightNr(index);
-
-    LoadChanLocs;
-    LoadFolderNames;
-    LoadParams;
+function [globalCoherence, firstEigenvectors] = ComputeGlobalCoherence(data, windowSize)
+% Computes global coherence (as described in Observed Brain Dynamics, Mitra & Bokil 2007)
+%
+% Input:
+% data is a 3D matrix:  nrTimeSamples x nrChans x nrFreqs
+% windowSize is the number of samples to compute globalCoherence from (try
+% to give a number that nrTimeSamples is divisible by - otherwise several
+% time samples will be skipped at the end)
+%
+% Output:
+% globalCoherence is a 2D matrix: nrWindows x nrFreqs
+% (where nrWindows is the number of windows of the specified size fitting
+% into the total number of time samples - leftovers will be skipped)
+%
+% Author: Iulia M. Comsa, imc31@cam.ac.uk, Nov 2014
     
-    clearvars -except folderFourier folderGlobalCoherence patientnr nightnr chanlocs91 globalCoherenceWindow;
     
-    % load noisiness params
-    [~, noisiness] = MarkNoisyData(patientnr, nightnr);
-    thresholdBadChansPerEpoch = GetThresholdBadChansPerEpoch(patientnr, nightnr) * size(noisiness,1);
-    thresholdBadEpochsPerGloCoh = GetThresholdBadEpochsPerGlobalCoherence(patientnr, nightnr) * globalCoherenceWindow;
-
-    % load fourier transforms (X) from freq struct
-    load([folderFourier 'fourier_p' int2str(patientnr) '_overnight' int2str(nightnr) '.mat']);
-    X = freqStruct.fourierspctrm;
-    nrEpochs = size(X, 1);
-    nrChans = size(X, 2);
-    nrFreqs = size(X, 3);
+    % data dimensions
+    nrSamples = size(data, 1);
+    nrChans = size(data, 2);
+    nrFreqs = size(data, 3);
     
     % compute SVD for windows
-    windowSize = globalCoherenceWindow;
-    nrWindows = length(1:windowSize:(nrEpochs - windowSize));
-    %nrEigenvals = min(nrChans, windowSize - thresholdBadEpochsPerGloCoh);
-    windowedEigenvectors = zeros(nrChans, nrChans, nrWindows, nrFreqs); 
-    windowedEigenvals = cell(nrWindows, nrFreqs);
+    nrWindows = length(1:windowSize:(nrSamples + 1 - windowSize));
+    eigenvectors = zeros(nrChans, nrChans, nrWindows, nrFreqs); 
+    eigenvals = cell(nrWindows, nrFreqs);
 
     % The Math:
     % [u,s,v] = svd(x)
@@ -39,136 +35,33 @@ function ComputeGlobalCoherence(index)
     %
     % s is diagonal and contains singular values (square them to actually get CX eigenvalues)
     % sum of squared abs eigenvectors should be 1 (it is indeed)
-    % i.e. sum(abs(windowedEigenvectors(:,1,18,94)).^2) == 1 (as per Cimenser  2011)
-    %
-    % + cleaning code
+    % i.e. sum(abs(windowedEigenvectors(:,1,18,94)).^2) == 1 (as per Cimenser et al. 2011)
+   
     for f = 1:nrFreqs
-        indexWindow = 0;
-        for w = 1:windowSize:(nrEpochs - windowSize)
-            indexWindow = indexWindow + 1;
-            crtX = X(w : w+windowSize-1, :, f);
+        w = 1;
+        for indexWindow = 1:nrWindows         
+            crtX = data(w : w+windowSize-1, :, f);            
+            [~,s,v] = svd(crtX); 
+            eigenvals{indexWindow,f} = diag(s).^2;
+            eigenvectors(:,:,indexWindow,f) = abs(v).^2;
             
-            % skip bad epochs from the calculation
-            nrBadEpochs = 0;
-            for e = w : (w+windowSize-1)
-                if sum(noisiness(:,e)) > thresholdBadChansPerEpoch
-                    crtX(e - nrBadEpochs - w + 1,:) = [];
-                    nrBadEpochs = nrBadEpochs + 1;
-                end
-            end
-            
-            % skip calculating the current wpli if too many epochs are bad
-            if nrBadEpochs > thresholdBadEpochsPerGloCoh
-                windowedEigenvals{indexWindow,f} = NaN;
-                windowedEigenvectors(:,:,indexWindow,f) = NaN * ones(nrChans,nrChans);
-            else
-                [~,s,v] = svd(crtX); 
-                windowedEigenvals{indexWindow,f} = diag(s).^2;
-                windowedEigenvectors(:,:,indexWindow,f) = abs(v).^2;
-            end
+            w = w + windowSize;
         end
     end
 
     % compute global coherence on windows
-    windowedGlobalCoherence = zeros(nrWindows, nrFreqs);
+    globalCoherence = zeros(nrWindows, nrFreqs);
+    firstEigenvectors = cell(nrWindows, nrFreqs);
     for f = 1:nrFreqs
         for t = 1:nrWindows
-            if isnan(windowedEigenvals{t,f})
-                windowedGlobalCoherence(t,f) = NaN;
+            if isnan(eigenvals{t,f})
+                globalCoherence(t,f) = NaN;
+                firstEigenvectors{t,f} = NaN;
             else
-                windowedGlobalCoherence(t,f) = max(windowedEigenvals{t,f}) / sum(windowedEigenvals{t,f});
+                globalCoherence(t,f) = max(eigenvals{t,f}) / sum(eigenvals{t,f});
+                firstEigenvectors{t,f} = eigenvectors(:,1,t,f);
             end
         end
     end
-    
-    % save
-    GC = [];
-    GC.globalCoherence = windowedGlobalCoherence;
-    GC.patientnr = patientnr;
-    GC.nightnr = nightnr;
-    GC.eigenvals = windowedEigenvals;
-    GC.firstEigenvector = windowedEigenvectors(:,1,:,:);
-    GC.time = MakeTimeLabelsCrossSpectraEpochs(nrWindows)*windowSize;
-    GC.freq = freqStruct.freq;
-    GC.chanlocs = chanlocs91;
-    GC.globalCoherence
-    save([folderGlobalCoherence 'glo_coh_p' int2str(patientnr) '_night' int2str(nightnr) '.mat'], 'GC');
-
-    % BONUS STUFF:
-
-    % compute spectrum (S)
-    %S = X .* conj(X);
-
-    % compute cross-spectra (CX)
-    %CX = zeros(nrChans, nrChans, nrEpochs, nrFreqs);
-    %for i = 1:nrChans
-    %    for j = 1:nrChans
-    %        CX(i,j,:,:) = squeeze(X(:,i,:)) .* squeeze(conj(X(:,j,:)));
-    %    end
-    %end
-
-    % compute the eigenvals and eigenvectors of CX
-    %eigenvectors = zeros(nrChans, nrChans, nrEpochs, nrFreqs);
-    % eigenvals = zeros(nrChans, nrEpochs, nrFreqs);
-    % for f = 1:nrFreqs
-    %     for t = 1:nrEpochs
-    %         [~,eigenvalmatr] = eig(CX(:,:,t,f));
-    %         eigenvals(:,t,f) = diag(eigenvalmatr);
-    %     end
-    % end
-    % 
-    % % compute global coherence
-    % globalCoherence = zeros(nrEpochs, nrFreqs);
-    % for f = 1:nrFreqs
-    %     for t = 1:nrEpochs
-    %         globalCoherence(t,f) = max(eigenvals(:,t,f)) / sum(eigenvals(:,t,f));
-    %     end
-    % end
-    % 
-    % % plot max eigenvals
-    % figure;imagesc(freqStruct.freq, MakeTimeLabelsCrossSpectraEpochs(nrEpochs), squeeze(eigenvals(end,:,:))');
-    % title('Maximum eigenvals');
-    % xlabel('Time (h)');
-    % ylabel('Frequency (Hz)');
-    % 
-    % % retrieve chans in the eigenvectors corresponding to the largest eigenval
-    % LoadChanLocs;
-    % labels = {chanlocs91.labels};
-    % %figure; topoplot(abs(eigenvectors(:,end,end,94)),chanlocs91);
-    % 
-
-
-
-    
-    % % do upgraded Karhunen-Loeve transform THAT WILL WORK YAY - l.e. not really
-    % Y = zeros(nrEpochs, nrChans, nrFreqs);
-    % windowSize = 16;
-    % for f = 1:nrFreqs
-    %     for w = 1:windowSize:64
-    %         
-    %         % reference Jain's book pg. 34
-    %         
-    %         % obtain autocorrelation matrix of the vector of chans at this time x freq
-    %         % !!! IF THIS DOESN'T WORK RECHECK THAT THIS IS INDEED THE AUTOCORRELATION
-    %         [~,r] = corrmtx(X(t,:,f),nrChans-1);
-    %         
-    %         % obtain eigenvectors of autocorrelation matrix (check r*v == v*d)
-    %         [v,d] = eig(r);
-    %         
-    %         % obtain u such that u*r*v == d (it's the conjugate transpose)
-    %         u = ctranspose(v);
-    %         
-    %         % this should work
-    %         Y(t,:,f) = u * X(t,:,f)';
-    %     end
-    % end
-    % 
-    % % recompute cross-spectra (CY) in new basis
-    % CY = zeros(nrChans, nrChans, nrEpochs, nrFreqs);
-    % for i = 1:nrChans
-    %     for j = 1:nrChans
-    %         CY(i,j,:,:) = squeeze(Y(:,i,:)) .* squeeze(conj(Y(:,j,:)));
-    %     end
-    % end
     
 end

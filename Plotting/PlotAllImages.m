@@ -1,4 +1,4 @@
-function maxFrequencies = PlotAllImages(patientnr, nightnr, freq, description)
+function PlotAllImages(patientnr, nightnr, freq, description)
     % plots all jpg figures given a connectivity struct, chanlocs and frequency
     % in the patient's folder
     % freq = array of hz vals like [8 8.1 8.2 8.3 ... 9.8]
@@ -8,61 +8,69 @@ function maxFrequencies = PlotAllImages(patientnr, nightnr, freq, description)
     % load chanlocs
     LoadChanLocs;
     LoadFolderNames;
+    LoadParams;
+    nrChans = 91;
     
+    % load color scheme
+    load('/imaging/sc03/Iulia/Overnight/mycolormap.mat');
+    
+    % load matrices
     [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr, freq);
     
+    % load community structs
+    load([folderMeasures 'communitystruct_p' int2str(patientnr) '_overnight' int2str(nightnr) '_' description '.mat']);
+    
     % output folder
-    folder_figures = [folderFigures 'wplitopo_' 'p' int2str(patientnr) '_overnight' int2str(nightnr) '_' description '/'];
+    folder_figures = [folderFiguresWpli3D 'p' int2str(patientnr) '_overnight' int2str(nightnr) '_' description '/'];
     if(~exist(folder_figures,'dir'))
         mkdir(folder_figures);
     end
     
     fprintf('Number of time frames is %d\n', length(matrices));
 
-    history1 = [];
-    history2 = [];
-    
-    history_vsize1 = [];
-    history_vsize2 = [];
-    colormap = rand(length(matrices{1}),3);
+    prevModules = [];
+    moduleSeed = 1;
     
     ft_progress('init', 'text', 'Drawing figures...');
-    for t = 1:length(matrices)
+    for t = 207:300%length(matrices)
         ft_progress(t/length(matrices));
-        if(isnan(matrices{t}))
-            h = figure;
-            showaxes('off');
-            box('off');
-            axis('off');
+        
+        % construct figure title
+        t1 = (wpliWindowOverlap*(t-1))*epochSizeSeconds / 86400;
+        t2 = t1 + epochSizeSeconds*wpliProcessingWindow / 86400;
+        strtitle = ({['P' int2str(patientnr) ' night ' num2str(nightnr) ' ' description], ['Time: ' datestr(t1,'HH:MM:ss') ' - ' datestr(t2,'HH:MM:ss')]});
+        
+        % plot greys if bad window
+        if( length(matrices{t}) < 2 )
+            
+            h = PlotGraphModules3D(zeros(91,91),ones(1,91),chanlocs91,mycolormap, strtitle);
+         
         else
             
-            % plot
-            h = figure;
+                
+            % threshold matrix
+            matrix = threshold_proportional(matrices{t},0.2);
+            crtModules = modules{t};
+            crtNodeWeights = sum(matrix > 0,2) / nrChans;
             
-            subplot(1,3,1);
-            [~] = plotgraph(matrices{t},chanlocs91, [], [], colormap, {}, 'legend', 'off', 'plotqt', 0.95,'visible',0);
-            set(get(gca, 'Title'), 'visible', 'on'); title('Louvain - no history');
-
-            subplot(1,3,2);
-            [history1, history_vsize1] = plotgraph(matrices{t},chanlocs91, history1, history_vsize1, colormap, {'similarityProportional', 'proportionCommonNodes'}, 'legend', 'off', 'plotqt', 0.95,'visible',0);
-            set(get(gca, 'Title'), 'visible', 'on'); title('Louvain - proportional similarity');
-
-            subplot(1,3,3);
-            [history2, history_vsize2] = plotgraph(matrices{t},chanlocs91, history2, history_vsize2, colormap, {'similarityWeighted', 'proportionCommonNodes'}, 'legend', 'off', 'plotqt', 0.95,'visible',0);
-            set(get(gca, 'Title'), 'visible', 'on'); title('Louvain - weighted similarity');
-
+            if ( ~isempty(prevModules) )
+                [crtModules, moduleSeed] = ReassignModules(crtModules, prevModules, {'nrCommonNodes', 'similarityProportional'}, crtNodeWeights, prevNodeWeights, moduleSeed);    
+            end
             
+            h = PlotGraphModules3D(matrix,mod(crtModules,91)+1,chanlocs91,mycolormap, strtitle);
+            
+            prevModules = crtModules;
+            prevNodeWeights = crtNodeWeights;
 
         end
         
-        % display time limits in title
-        %t1 = (windowOverlap*(t-1))*epochSizeSeconds;
-        %t2 = t1 + epochSizeSeconds*processingWindow;
-        suptitle(['P' int2str(patientnr) ' ' description ' band']);
-
+        
+        
         % save figure
-        print(h, '-djpeg', '-r350', [folder_figures int2str(t) '.jpg']);
-        %saveas(gcf,[folder_figures int2str(t) '.jpg']);
+        set(gcf, 'PaperPosition', [0 0 10 10]);
+        set(gcf, 'InvertHardCopy', 'off');
+        %print(h, '-djpeg', '-r350', [folder_figures int2str(t) '.jpg']);
+        saveas(gcf,[folder_figures int2str(t) '.jpg']);
         close;
     end
     ft_progress('close');

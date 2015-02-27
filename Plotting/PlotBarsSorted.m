@@ -1,16 +1,20 @@
-function PlotBarsSorted
+function PlotBarsSorted(otherparams)
 
     LoadFolderNames;
 
     score = 'outcome';
-    measure = 'theta-delta-ratio';
-    titlestr = 'Mean theta-delta ratio of contribution percentage';
+    measure = 'sd-modspan';
+    titlestr = ['SD of modular span - ' otherparams.bandName];
+    filename = ['sd-' measure '-' otherparams.bandName];
 
     % night 1
     night = 1;
 
     [patients, scores] = LoadScores(score);
-    [measures, stddevs] = MakeMeasures(measure, night, patients);
+    [measures, stddevs] = MakeMeasures(measure, night, patients, otherparams);
+    m.patients = patients;
+    m.measures = measures;
+    m.stddevs = stddevs;
     y(:,1) = measures'; 
     y(:,2) = zeros(length(measures),1);
     e = zeros(length(measures),2,2);
@@ -24,7 +28,11 @@ function PlotBarsSorted
         [~, i] = intersect(patients,paux);
         patients2 = patients(i);
     end
-    [measures, stddevs] = MakeMeasures(measure, night, patients2);
+    [measures, stddevs] = MakeMeasures(measure, night, patients2, otherparams);
+    m.patients2 = patients2;
+    m.measures2 = measures;
+    m.stddevs2 = stddevs;
+    save(['/imaging/sc03/Iulia/Overnight/graph-measures/' filename '.mat'],'m');
     y(i,2) = measures;
     e(i,2,2) = stddevs';
     
@@ -35,8 +43,8 @@ function PlotBarsSorted
     patients = patients(order);
 
     h = figure;
-        ha = tight_subplot(2,1,0.05,[0.2 0.05],0.05);
-        axes(ha(2));
+%         ha = tight_subplot(2,1,0.05,[0.2 0.05],0.05);
+%         axes(ha(2));
     [bh, eh] = barwitherr(e,y);
     set(gca,'XTick',1:length(scores));
     set(eh, 'LineWidth', 1);
@@ -45,25 +53,24 @@ function PlotBarsSorted
     set(gca, 'TickLength', [0 0]);
     xlabel('Outcome','FontSize',25);
     xlim([0 length(scores)+1]);
-        ylim([0 0.5]);
+        %ylim([0 0.5]);
     set(gca, 'FontSize', 25);
     
-        axes(ha(1));
-        [bh, eh] = barwitherr(e,y);
-        set(gca,'XTick',1:length(scores));
-        set(gca,'XTickLabel',[]);
-        set(eh, 'LineWidth', 1);
-        set(bh, 'BarWidth', 1);
-        set(gca, 'TickLength', [0 0]);
-        xlim([0 length(scores)+1]);
-        ylim([0.5 5]);
-        set(gca, 'FontSize', 18);
+%         axes(ha(1));
+%         [bh, eh] = barwitherr(e,y);
+%         set(gca,'XTick',1:length(scores));
+%         set(gca,'XTickLabel',[]);
+%         set(eh, 'LineWidth', 1);
+%         set(bh, 'BarWidth', 1);
+%         set(gca, 'TickLength', [0 0]);
+%         xlim([0 length(scores)+1]);
+%         %ylim([0.5 5]);
+%         set(gca, 'FontSize', 18);
     
     title(titlestr);
     legend('Night 1','Night 2');
     set(h, 'Position', [200 200 1200 800]);
     options.Format = 'jpeg';
     %hgexport(h,  ['/imaging/sc03/Iulia/Overnight/figures-power' num2str(patientnr) '.jpg'], options);
-    print(h, '-djpeg', '-r350', [folderFiguresPower titlestr '.jpg']);
-end
+    print(h, '-djpeg', '-r350', ['/imaging/sc03/Iulia/Overnight/figures-measures/' filename '.jpg']);
 

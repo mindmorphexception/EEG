@@ -1,12 +1,13 @@
 function measures = ComputeGraphMeasuresCore(matrix)
+    % matrix is WU (weighted undirected)
 
     nrNodes = length(matrix);
     
     % mean degree
-
+    
     % clustering coefficient
     measures.clustering = clustering_coef_wu(matrix);
-    measures.meanclustering = mean(measures.clustering); % this
+    measures.meanclustering = median(measures.clustering); % this
     measures.maxclustering = max(measures.clustering);
     measures.stdclustering = std(measures.clustering);
 
@@ -19,7 +20,7 @@ function measures = ComputeGraphMeasuresCore(matrix)
 
     % betweenness
     measures.betweenness = betweenness_wei(distance_wei(weight_conversion(matrix, 'lengths')))/((nrNodes-1) * (nrNodes-2));
-    measures.meanbetweenness = mean(measures.betweenness);
+    measures.meanbetweenness = median(measures.betweenness);
     measures.maxbetweenness = max(measures.betweenness);
     measures.stdbetweenness = std(measures.betweenness);
 
@@ -28,7 +29,7 @@ function measures = ComputeGraphMeasuresCore(matrix)
 
     % participation coefficient
     measures.participation = participation_coef(matrix,measures.communityStructure);
-    measures.meanparticipation = mean(measures.participation);
+    measures.meanparticipation = median(measures.participation);
     measures.maxparticipation = max(measures.participation);
     measures.stdparticipation = std(measures.participation);
 end

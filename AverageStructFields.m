@@ -16,12 +16,15 @@ function s = AverageStructFields(structCell)
         % initialize
         s.(fields{i}) = zeros(1, fieldLength);
         
-        % weighted sum
+        % median
         for j = 1:fieldLength
+            values = zeros(1,nrStructs);
             for k = 1:nrStructs
-                s.(fields{i})(j) = s.(fields{i})(j) + structCell{k}.(fields{i})(j) / nrStructs;
-            end
+                values(k) = structCell{k}.(fields{i})(j);
+            end   
+                s.(fields{i})(j) = median(values);
         end
+        
     end
 end
 

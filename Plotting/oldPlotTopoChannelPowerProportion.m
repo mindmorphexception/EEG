@@ -21,10 +21,22 @@ function [alphaP, thetaP, deltaP, label, elec] = PlotTopoChannelPowerProportion(
     for nightnr = 1:length(nights)
         
         % filename
-        filename = ['power_spectra_clean_p' int2str(patientnr) '_overnight' int2str(nightnr)];
+        filename = ['power_spectra_p' int2str(patientnr) '_overnight' int2str(nightnr)];
 
         % load freq struct
-        load([folderPowspecClean filename '.mat']);
+        load([folderPowspec filename '.mat']);
+        nrEpochs = size(freqStruct.powspctrm,1);
+            
+        % clean
+        [~, noisinessMatrix] = MarkNoisyData(patientnr, nightnr);
+        thresholdBadChansPerEpochs = GetThresholdBadChansPerEpoch(patientnr, nightnr);
+        badEpochs = [];
+        for e = 1:nrEpochs
+            if sum(noisinessMatrix(:,e)) > thresholdBadChansPerEpochs * size(noisinessMatrix, 1)
+                badEpochs = [badEpochs e];
+            end
+        end
+        freqStruct.powspctrm(badEpochs,:,:) = []; 
 
         % init
         nrEpochs = size(freqStruct.powspctrm,1);
@@ -43,10 +55,10 @@ function [alphaP, thetaP, deltaP, label, elec] = PlotTopoChannelPowerProportion(
         topoStruct.deltaProportion = zeros(nrChans,1);
 
         % compute channel contribution in each band
-        indicesDelta = (freqs >= 1 & freqs <= 4);
-        indicesTheta = (freqs >= 4 & freqs <= 8);
-        indicesAlpha = (freqs >= 8 & freqs <= 12);
-        indicesAllThreeBands = (freqs >= 1 & freqs <= 12);
+        indicesDelta = (freqs >= 1 & freqs < 4);
+        indicesTheta = (freqs >= 4 & freqs < 8);
+        indicesAlpha = (freqs >= 8 & freqs <= 13);
+        indicesAllThreeBands = (freqs >= 1 & freqs <= 13);
 
         % sum total power in each band (including all bands) at every channel
         totalDeltaPerChan = sum(sum(freqStruct.powspctrm(:,:,indicesDelta),3),1)';

@@ -1,0 +1,11 @@
+figure
+hold all
+plot(MakeTimeLabelsWpliEpochs(495),medwpli1,'DisplayName','Night1','Color',[0.27 0.1 0.8],'LineWidth',3)
+plot(MakeTimeLabelsWpliEpochs(489),medwpli2,'DisplayName','Night2','Color',[0.8 0.1 0.27],'LineWidth',3)
+legend show
+title('Median WPLI, patient 2, theta band','FontSize',20)
+ylim([0 1])
+set(gca,'FontSize',20);
+xlabel('Time (h)');
+ylabel('WPLI');
+grid on

@@ -5,6 +5,24 @@ function [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr,
     % input folder
     LoadFolderNames;
 
+    if (isequal(freq,1:0.1:4))
+        load([folderMatrix 'p' num2str(patientnr) '_overnight' num2str(nightnr) '_delta.mat']);
+        matrices = res.matrices;
+        maxFrequencies = res.maxFrequencies;
+    elseif (isequal(freq,4:0.1:8))
+        load([folderMatrix 'p' num2str(patientnr) '_overnight' num2str(nightnr) '_theta.mat']);
+        matrices = res.matrices;
+        maxFrequencies = res.maxFrequencies;
+    elseif (isequal(freq,8:0.1:13))
+        load([folderMatrix 'p' num2str(patientnr) '_overnight' num2str(nightnr) '_alpha.mat']);
+        matrices = res.matrices;
+        maxFrequencies = res.maxFrequencies;
+    elseif (isequal(freq,1:0.1:13))
+        load([folderMatrix 'p' num2str(patientnr) '_overnight' num2str(nightnr) '_allfreq.mat']);
+        matrices = res.matrices;
+        maxFrequencies = res.maxFrequencies;
+
+   else
     % load matrices
     allfreq_matrix = cell(1,length(freq));
     nrEpochs = 0;
@@ -41,12 +59,15 @@ function [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr,
             maxFreq(crtMatrix == allfreq_matrix{f}{t}) = freq(f);
         end
 
+        if(length(crtMatrix) > 1)
+            crtMatrix(isnan(crtMatrix)) = 0; % treat NaNs as zeros
+        end
         matrices{t} = crtMatrix;
         maxFreq(logical(eye(length(crtMatrix)))) = 0; % sets diagonal to 0
         maxFrequencies{t} = maxFreq;
         ft_progress(t/nrEpochs);
     end
     ft_progress('close');
-    
+    end
 end
 

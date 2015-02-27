@@ -20,8 +20,9 @@ function ComputeCrossSpectra(index)
     freqCfg.output = 'powandcsd';
     freqStruct = ft_freqanalysis(freqCfg, fieldtripSet);
 
-    %save([folderCrossSpectra 'cross_spectra_p' int2str(patientnr) '_overnight' int2str(nightnr)], 'freqStruct');
+    %save([folderCrossSpectra 'cross_spectra_p' int2str(patientnr) '_overnight' int2str(nightnr)], 'freqStruct','-v7.3');
     ComputeWpli(freqStruct, filename(1:length(filename)-14), patientnr, nightnr);
+    %ComputeCrossSpectraGlobalCoherence(patientnr, nightnr, freqStruct);
 
 end
  

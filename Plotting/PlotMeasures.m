@@ -6,6 +6,8 @@ function PlotMeasures(patientnr, nightnrs, aux)
         'meanbetweenness', 'maxbetweenness', 'stdbetweenness', ...
         'meanparticipation', 'maxparticipation', 'stdparticipation'};
     
+    measureNames = {'globalEfficiency'};
+    
     LoadFolderNames;
     
     % initialize
@@ -24,7 +26,7 @@ function PlotMeasures(patientnr, nightnrs, aux)
         nrEpochs = length(measures);
 
         % generate time labels in hours
-        timelabel{night} = MakeTimeLabelsWpliEpochs(nrEpochs);
+        timelabel{night} = MakeTimeLabelsWpliEpochs(nrEpochs) * 10 - MakeTimeLabelsWpliEpochs(1) * 10;
 
         % save in y the measure for the night/measurenr
         for i = 1:length(measureNames)
@@ -76,11 +78,11 @@ function PlotMeasures(patientnr, nightnrs, aux)
     for night = 1:length(nightnrs)
         legendstr{night} = ['Night ' int2str(night)];
     end
-    %legend(legendstr);
+    legend(legendstr);
     
-    set(gcf, 'PaperType', 'E', 'PaperPosition', [0 0 10 70]);
-    set(gcf, 'Visible', 'off');
-    print(h, '-djpeg', '-r350', [folderFigures 'measures_' aux '_p' num2str(patientnr) '.jpg']);
+    %set(gcf, 'PaperType', 'E', 'PaperPosition', [0 0 10 70]);
+    %set(gcf, 'Visible', 'off');
+    %print(h, '-djpeg', '-r350', [folderFigures 'measures_' aux '_p' num2str(patientnr) '.jpg']);
   
 end
 

@@ -4,6 +4,6 @@ function thresholdBadEpochsPerGlobalCoherence = GetThresholdBadEpochsPerGlobalCo
     index = GetPatientIndex(patientnr, nightnr);
     thresholdBadEpochsPerGlobalCoherence = data{index,8};
     
-    thresholdBadEpochsPerGlobalCoherence = 0.4;
+    thresholdBadEpochsPerGlobalCoherence = 0.99;
     
 end

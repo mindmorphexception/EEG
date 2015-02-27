@@ -1,40 +1,31 @@
-function RunMainPipeline(patientnr, nightnr)
-    
-     AddPaths;
-     eeglab;
-     clearvars -except patientnr nightnr;
+
       
     fprintf('*** Java memory is %f\n', java.lang.Runtime.getRuntime.maxMemory / (2^30));   
 
-    LoadFolderNames;
+    %LoadFolderNames;
     LoadParams;
+    folderData = '/imaging/sc03/Iulia/Sedation/datasets_restingstate/';
+    folderDataSets = '/imaging/sc03/Iulia/Sedation/sets/';
+    folderStdDev = '/imaging/sc03/Iulia/Sedation/stddev/';
    
     stddevs = [];
         
     fprintf('*** Generating std dev matrix.\n');
 
     % get file index 
-    i = GetPatientIndex(patientnr, nightnr); 
+    patientnr = 6;
+    nightnr = 1;
 
     % construct the first and last samples to read from file, cleaning throsholds
-    filename = data{i,1}; %rstimes = dataRestingStates(i,2);
-    fileFirstSample = data{i,2};
-    fileLastSample = data{i,3};
-    actualSrate = data{i,4};
-    thresholdChannelStdDev = data{i,5};
-    thresholdBadChansPerEpochs = data{i,6};
-        
-
-    % don't process if cleaning thresholds not set
-    if isnan(data{i,5})
-        return;
-    end
-
-    fprintf('Reading %f hours of file %s\n', (fileLastSample - fileFirstSample + 1) / (actualSrate * 60 * 60), filename);
+    filename = '06-2010-anest 20100224 0939.mff_rs1.set';
+    
+    actualSrate = 250
+    thresholdChannelStdDev = 0.1;
+    thresholdBadChansPerEpochs = 0.1;
 
 
     % load an eeglab set
-    eeglabSet = pop_readegimff([folderData filename], 'firstsample', 1, 'lastsample', fileLastSample);
+    eeglabSet = pop_loadset('filename',filename,'filepath',folderData);
 
     % remove channels we don't want to see
     fprintf('*** Selecting channels...\n');
@@ -52,6 +43,9 @@ function RunMainPipeline(patientnr, nightnr)
     % filter data 
     eeglabSet = pop_eegfiltnew(eeglabSet, 0.5, 25);
     
+    % save set
+    eeglabSet = pop_saveset(eeglabSet, 'filename', [filename '_precleanwithevents.set'], 'filepath', folderDataSets);
+
     % create events for epoching
     nrEpochs = floor ( length(eeglabSet.times) / epochSizeSamples );
     ft_progress('init', 'text', '*** Creating events...');
@@ -147,17 +141,7 @@ function RunMainPipeline(patientnr, nightnr)
     save([folderDataSets filename '_fieldtrip.mat'], 'fieldtripSet', '-v7.3');
 
     
-    
-    
-    
-    % mark bad epochs
-    %badEpochIndices = sum(noisinessMatrix,1) > thresholdBadChansPerEpoch * nrChans;
-    %fprintf('*** Marking %d (%f%%) epochs as bad.\n',sum(badEpochIndices), sum(badEpochIndices)/length(badEpochIndices));
-    %noisinessMatrix(:, badEpochIndices) = 1;
-    %save(noisinessMatrixFilename,'noisinessMatrix');
-    
     fprintf('Done.\n');
-end
 
 
 

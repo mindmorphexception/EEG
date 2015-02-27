@@ -47,13 +47,22 @@ function PlotPowerSpectraOverTime(patientnr, nightnr, channelStr)
     end
     
     % heatplot frequency x time
-    imagesc(timelabel, freqStruct.freq, mag2db(freqs));
+    freqs = mag2db(freqs);
+    freqs(isnan(freqs)) = min(min(freqs)) - 1;
+    h = figure;
+    hi = imagesc(timelabel, freqStruct.freq, freqs);
     %caxis([0 10]);
+    colormap([0 0 0; colormap]);
     xlabel('Time (hours)','FontSize',20);
     ylabel('Frequency (Hz)','FontSize',20);
     title(['Power spectra for patient ' int2str(patientnr) ' (night ' int2str(nightnr) ') at ' channelStr]);
     colorbar
     set(gca,'FontSize',20)
     set(gca,'YDir','normal');
+    if isempty(channelStr)
+        channelStr = 'all chans mean';
+    end
+
+    print(h, '-djpeg', '-r350', ['/imaging/sc03/Iulia/Overnight/figures-power-spectra/pow_p' num2str(patientnr) '_overnight' num2str(nightnr) '_' channelStr '.jpg']);
     
 end

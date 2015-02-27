@@ -1,5 +1,5 @@
 
-function globalCoherence = ComputeGlobalCoherence(data, windowSize)
+function [globalCoherence, firstEigenvectors] = ComputeGlobalCoherence(data, windowSize)
 % Computes global coherence (as described in Observed Brain Dynamics, Mitra & Bokil 2007)
 %
 % Input:
@@ -51,12 +51,15 @@ function globalCoherence = ComputeGlobalCoherence(data, windowSize)
 
     % compute global coherence on windows
     globalCoherence = zeros(nrWindows, nrFreqs);
+    firstEigenvectors = cell(nrWindows, nrFreqs);
     for f = 1:nrFreqs
         for t = 1:nrWindows
             if isnan(eigenvals{t,f})
                 globalCoherence(t,f) = NaN;
+                firstEigenvectors{t,f} = NaN;
             else
                 globalCoherence(t,f) = max(eigenvals{t,f}) / sum(eigenvals{t,f});
+                firstEigenvectors{t,f} = eigenvectors(:,1,t,f);
             end
         end
     end

@@ -16,7 +16,7 @@ function PlotTopoChannelPowerProportionAllPatients
         
         patientnr = patients(p)
         
-        [alphaP_n, thetaP_n, deltaP_n, label, elec] = PlotTopoChannelPowerProportion(patientnr);
+        [alphaP_n, thetaP_n, deltaP_n, label, elec] = oldPlotTopoChannelPowerProportion(patientnr);
         
         for i = 1:length(alphaP_n)
             index = index + 1;
