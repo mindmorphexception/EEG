@@ -7,13 +7,22 @@ function thisMeasure = GetGraphMeasures(patientnr, nightnr, aux, measureName)
     
     % init
     nrEpochs = length(measures);
-    thisMeasure = zeros(1, nrEpochs);
+
+    % find out measure length
+    i = 1;
+    while ~isstruct(measures{i})
+        i = i+1;
+    end
+    L = length(measures{i}.(measureName));
+
+    % init
+    thisMeasure = zeros(nrEpochs,L);
     
     for t = 1:nrEpochs
         if (isstruct(measures{t}))
-            thisMeasure(t) = measures{t}.(measureName);
+            thisMeasure(t,:) = measures{t}.(measureName);
         else
-            thisMeasure(t) = NaN;
+            thisMeasure(t,:) = NaN * ones(1,L);
         end
     end
     

@@ -18,13 +18,22 @@ function PlotAllImages(patientnr, nightnr, freq, description)
     [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr, freq);
     
     % load community structs
-    load([folderMeasures 'communitystruct_p' int2str(patientnr) '_overnight' int2str(nightnr) '_' description '.mat']);
+    %load([folderMeasures 'communitystruct_p' int2str(patientnr) '_overnight' int2str(nightnr) '_' description '.mat']);
     
     % output folder
-    folder_figures = [folderFiguresWpli3D 'p' int2str(patientnr) '_overnight' int2str(nightnr) '_' description '/'];
+    folder_figures = ['/imaging/sc03/Iulia/Overnight/filmfig/thr01' 'p' int2str(patientnr) '_overnight' int2str(nightnr) '_' description '/'];
     if(~exist(folder_figures,'dir'))
         mkdir(folder_figures);
     end
+    
+    % image config
+    myStyle = hgexport('factorystyle');
+    myStyle.Format = 'png';
+    myStyle.Resolution = 300;
+    myStyle.FontSizeMin = 20;
+    myStyle.Width = 10;
+    myStyle.Height = 10;
+    myStyle.Background = 'k';
     
     fprintf('Number of time frames is %d\n', length(matrices));
 
@@ -32,7 +41,7 @@ function PlotAllImages(patientnr, nightnr, freq, description)
     moduleSeed = 1;
     
     ft_progress('init', 'text', 'Drawing figures...');
-    for t = 207:300%length(matrices)
+    for t = 1:1000%length(matrices)
         ft_progress(t/length(matrices));
         
         % construct figure title
@@ -49,8 +58,8 @@ function PlotAllImages(patientnr, nightnr, freq, description)
             
                 
             % threshold matrix
-            matrix = threshold_proportional(matrices{t},0.2);
-            crtModules = modules{t};
+            matrix = threshold_proportional(matrices{t},0.1);
+            crtModules = modularity_louvain_und(matrix);
             crtNodeWeights = sum(matrix > 0,2) / nrChans;
             
             if ( ~isempty(prevModules) )
@@ -70,7 +79,8 @@ function PlotAllImages(patientnr, nightnr, freq, description)
         set(gcf, 'PaperPosition', [0 0 10 10]);
         set(gcf, 'InvertHardCopy', 'off');
         %print(h, '-djpeg', '-r350', [folder_figures int2str(t) '.jpg']);
-        saveas(gcf,[folder_figures int2str(t) '.jpg']);
+        %saveas(gcf,[folder_figures int2str(t) '.jpg']);
+        hgexport(gcf, [folder_figures int2str(t) '.png'], myStyle);
         close;
     end
     ft_progress('close');

@@ -204,7 +204,7 @@ function [means, stddevs] = MakeMeasures(measureName, night, patients, otherpara
             for p = 1:length(patients)
                 percentAlpha = GetPowerContributionAlpha(patients(p),night);
                 stddevs(p) = std(percentAlpha);
-                means(p) = mean(percentAlpha);
+                means(p) = median(percentAlpha);
                 nrsamples(p) = length(percentAlpha);
             end
             
@@ -212,7 +212,7 @@ function [means, stddevs] = MakeMeasures(measureName, night, patients, otherpara
             for p = 1:length(patients)
                 percentTheta = GetPowerContributionTheta(patients(p),night);
                 stddevs(p) = std(percentTheta);
-                means(p) = mean(percentTheta);
+                means(p) = median(percentTheta);
                 nrsamples(p) = length(percentTheta);
             end
             
@@ -220,7 +220,32 @@ function [means, stddevs] = MakeMeasures(measureName, night, patients, otherpara
             for p = 1:length(patients)
                 percentDelta = GetPowerContributionDelta(patients(p),night);
                 stddevs(p) = std(percentDelta);
-                means(p) = mean(percentDelta);
+                means(p) = median(percentDelta);
+                nrsamples(p) = length(percentDelta);
+            end
+            
+        % band contrib ============================  
+        case 'sd-alpha-contrib'
+            for p = 1:length(patients)
+                percentAlpha = GetPowerContributionAlpha(patients(p),night);
+                stddevs(p) = 0;
+                means(p) = std(percentAlpha);
+                nrsamples(p) = length(percentAlpha);
+            end
+            
+        case 'sd-theta-contrib'
+            for p = 1:length(patients)
+                percentTheta = GetPowerContributionTheta(patients(p),night);
+                stddevs(p) = 0;
+                means(p) = std(percentTheta);
+                nrsamples(p) = length(percentTheta);
+            end
+            
+        case 'sd-delta-contrib'
+            for p = 1:length(patients)
+                percentDelta = GetPowerContributionDelta(patients(p),night);
+                stddevs(p) = 0;
+                means(p) = std(percentDelta);
                 nrsamples(p) = length(percentDelta);
             end
         

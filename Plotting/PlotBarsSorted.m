@@ -3,9 +3,9 @@ function PlotBarsSorted(otherparams)
     LoadFolderNames;
 
     score = 'outcome';
-    measure = 'sd-modspan';
-    titlestr = ['SD of modular span - ' otherparams.bandName];
-    filename = ['sd-' measure '-' otherparams.bandName];
+    measure = 'sd-alpha-contrib';
+    titlestr = ['SD Alpha contribution']; %- ' otherparams.bandName];
+    filename = [measure]; %'-' otherparams.bandName];
 
     % night 1
     night = 1;
@@ -32,7 +32,7 @@ function PlotBarsSorted(otherparams)
     m.patients2 = patients2;
     m.measures2 = measures;
     m.stddevs2 = stddevs;
-    save(['/imaging/sc03/Iulia/Overnight/graph-measures/' filename '.mat'],'m');
+    save(['/imaging/sc03/Iulia/Overnight/power-measures/' filename '.mat'],'m');
     y(i,2) = measures;
     e(i,2,2) = stddevs';
     
@@ -72,5 +72,5 @@ function PlotBarsSorted(otherparams)
     set(h, 'Position', [200 200 1200 800]);
     options.Format = 'jpeg';
     %hgexport(h,  ['/imaging/sc03/Iulia/Overnight/figures-power' num2str(patientnr) '.jpg'], options);
-    print(h, '-djpeg', '-r350', ['/imaging/sc03/Iulia/Overnight/figures-measures/' filename '.jpg']);
+    print(h, '-djpeg', '-r350', ['/imaging/sc03/Iulia/Overnight/power-measures/' filename '.jpg']);
 

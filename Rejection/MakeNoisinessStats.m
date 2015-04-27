@@ -64,7 +64,7 @@ function MakeNoisinessStats()
             if nrBadEpochs > thresholdBadEpochsPerWpli
                 stats{i}.badWpliWindows = stats{i}.badWpliWindows + 1;
             elseif nrBadEpochs == 0
-                stats{i}.goodWpliWindows = stats{i}.badWpliWindows + 1;
+                stats{i}.goodWpliWindows = stats{i}.goodWpliWindows + 1;
             else
                 stats{i}.noisyWpliWindows(nrBadEpochs) = stats{i}.noisyWpliWindows(nrBadEpochs) + 1;
             end

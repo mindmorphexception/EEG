@@ -11,13 +11,13 @@ function [chanIndicesAlpha, chanIndicesTheta, chanIndicesDelta] = GetChannelBand
     %                       'E97', 'E91', 'E84', 'E76', 'E71', 'E66', 'E59', 'E51', ...
     %                       'E60', 'E67', 'E72', 'E77', 'E85'};
     
-    %chanLabelsDelta = { 'E62' }; 
-    %chanLabelsTheta = { 'E62' };
-    %chanLabelsAlpha = { 'E62' };
+    chanLabelsDelta = { 'E62' }; 
+    chanLabelsTheta = { 'E62' };
+    chanLabelsAlpha = { 'E62' };
     
-    chanLabelsDelta = elec;
-    chanLabelsTheta = elec;
-    chanLabelsAlpha = elec;
+    %chanLabelsDelta = elec;
+    %chanLabelsTheta = elec;
+    %chanLabelsAlpha = elec;
     
     chanIndicesDelta = find(ismember(elec,chanLabelsDelta));
     chanIndicesTheta = find(ismember(elec,chanLabelsTheta));                

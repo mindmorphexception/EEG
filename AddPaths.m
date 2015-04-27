@@ -7,6 +7,7 @@ function AddPaths
     addpath('/home/sc03/Iulia/eeglab/plugins/MFFimport1.00');
     addpath('/home/sc03/Iulia/eeglab');
     addpath('/home/sc03/Iulia/Iulia');
+    addpath('/home/sc03/Iulia/Iulia/Rejection');
     addpath('/home/sc03/Iulia/Srivas');
     addpath('/home/sc03/Iulia/Srivas/Overnight');
     addpath('/home/sc03/Iulia/Srivas/connectivity');

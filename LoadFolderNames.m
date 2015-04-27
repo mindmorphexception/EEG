@@ -63,7 +63,7 @@ elseif(environment == 3) % ============== MRC-CBU (Srivas) ============== %
     % chanlocs filepath
     chanlocsPath = '/home/sc03/Iulia/Iulia/chanlocs';
     % matrix folder
-    folderMatrix = '/imaging/sc03/Iulia/Overnight/matrix/';
+    folderMatrix = '/imaging/sc03/Iulia/Overnight/matrix-extra/';
     % measures folder
     folderMeasures = '/imaging/sc03/Iulia/Overnight/measures/';
     % figures folder

@@ -53,7 +53,7 @@ function ComputeModularSpan(patientnr, nightnr, freqname)
                     end
                 end
                 
-                thrModspan(index) = max(nonzeros(crtModspan));
+                thrModspan(index) = mean(nonzeros(crtModspan)); %max!
             end
             
             modspan(e) = median(thrModspan);
@@ -63,7 +63,7 @@ function ComputeModularSpan(patientnr, nightnr, freqname)
     ft_progress('close');
     
     LoadFolderNames;
-    save([folderMeasures 'modspan_p' num2str(patientnr) '_overnight' num2str(nightnr) '_' freqname '.mat'], 'modspan');
+    save([folderMeasures 'modspanmean_p' num2str(patientnr) '_overnight' num2str(nightnr) '_' freqname '.mat'], 'modspan');
 end
     
     

@@ -22,7 +22,7 @@ function [matrices, maxFrequencies] = AggregateMaxFreqMatrix(patientnr, nightnr,
         matrices = res.matrices;
         maxFrequencies = res.maxFrequencies;
 
-   else
+  else
     % load matrices
     allfreq_matrix = cell(1,length(freq));
     nrEpochs = 0;

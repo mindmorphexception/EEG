@@ -1,15 +1,15 @@
 clear
 clc
 j = 0;
-jobnrs = [16 17];
+jobnrs = [1:28];
 LoadFolderNames;
 for i = 1:length(jobnrs)
     [patientnr, nightnr] = GetPatientNightNr(jobnrs(i));
 
         j = j+1;
-    jobs(j).task=str2func('ComputeCrossSpectra'); % create a function handle for the current task
+    jobs(j).task=str2func('ComputeBandPowerContributions'); % create a function handle for the current task
     jobs(j).n_return_values=0;
-    jobs(j).input_args = {jobnrs(i)};
+    jobs(j).input_args = {patientnr, nightnr};
 
 
 end
@@ -28,7 +28,7 @@ mypaths = { '/home/sc03/Iulia/Iulia', ...
      };
 
 clear scheduler;
-scheduler=cbu_scheduler('custom',{'compute',12,128,1000000,'/imaging/sc03/Iulia/_cbu-cluster-outputs'});
+scheduler=cbu_scheduler('custom',{'compute',4,8,10000,'/imaging/sc03/Iulia/_cbu-cluster-outputs'});
 
 cbu_qsub(jobs,scheduler,mypaths);
 

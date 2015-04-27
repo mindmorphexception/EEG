@@ -13,9 +13,13 @@ function PlotWpliMatrix()
     [patients, scores] = LoadScores('outcome');
     [patients2, scores2] = LoadScores('crs-2');
     
-    for i = 5:length(patients)
+    for i = 1:length(patients)
         patientnr = patients(i);
         hasSecondNight = (sum(patients2 == patientnr)>0) && scores2(patients2 == patientnr) ~= 0;
+        
+        if ~hasSecondNight
+            continue;
+        end
         
         % night 1
         matrices = AggregateMaxFreqMatrix(patientnr, 1, bandwidth);
@@ -25,7 +29,8 @@ function PlotWpliMatrix()
             concatMatrices = cat(3, matrices{:});    
             matrix = std(concatMatrices,0,3);
             h = imagesc(matrix); colorbar; caxis([0 0.3]);
-            print(imgcf, '-djpeg', '-r80', ['/imaging/sc03/Iulia/Overnight/figures-wpli-matrices/' bandname '_P' num2str(patientnr) '_1-stddev.jpg']);
+            title(['P' num2str(patientnr) ' night 1']);
+            %print(imgcf, '-djpeg', '-r80', ['/imaging/sc03/Iulia/Overnight/figures-wpli-matrices/' bandname '_P' num2str(patientnr) '_1-stddev.jpg']);
         end
         
         % night 2
@@ -40,7 +45,8 @@ function PlotWpliMatrix()
             concatMatrices = cat(3, matrices{:});    
             matrix = std(concatMatrices,0,3);
             h = imagesc(matrix); colorbar; caxis([0 0.3]);
-            print(imgcf, '-djpeg', '-r80', ['/imaging/sc03/Iulia/Overnight/figures-wpli-matrices/' bandname '_P' num2str(patientnr) '_2-stddev.jpg']);
+            title(['P' num2str(patientnr) ' night 2']);
+            %print(imgcf, '-djpeg', '-r80', ['/imaging/sc03/Iulia/Overnight/figures-wpli-matrices/' bandname '_P' num2str(patientnr) '_2-stddev.jpg']);
         end
     end
 

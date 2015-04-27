@@ -28,11 +28,11 @@ function [measures,maxFrequencies] = ComputeGraphMeasures(patientnr, nightnr, fr
             matrix = threshold_proportional(matrices{t},thresh(thr));
             
             % compute measures
-            %thrMeasures{thr} = ComputeGraphMeasuresCore(matrix);
-            modules{t} = modularity_louvain_und(matrix);
+            thrMeasures{thr} = ComputeGraphMeasuresCore(matrix);
+            %modules{t} = modularity_louvain_und(matrix);
         end           
         ft_progress(t/nrEpochs);
-        %measures{t} = AverageStructFields(thrMeasures);
+        measures{t} = AverageStructFields(thrMeasures);
     end
     ft_progress('close');
     
@@ -40,5 +40,5 @@ function [measures,maxFrequencies] = ComputeGraphMeasures(patientnr, nightnr, fr
     info.thresh = thresh;
     %save([folderMeasures 'measures_p' int2str(patientnr) '_overnight' int2str(nightnr) '_' aux '.mat'], 'measures');
     %save([folderMeasures 'info_p' int2str(patientnr) '_overnight' int2str(nightnr) '_' aux '.mat'], 'info');
-    save([folderMeasures 'communitystruct_p' int2str(patientnr) '_overnight' int2str(nightnr) '_' aux '.mat'], 'modules');
+    %save([folderMeasures 'communitystruct_p' int2str(patientnr) '_overnight' int2str(nightnr) '_' aux '.mat'], 'modules');
 end

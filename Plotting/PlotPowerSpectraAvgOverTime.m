@@ -11,6 +11,20 @@ function PlotPowerSpectraAvgOverTime(patientnr, nightnr, channelStr)
     
     % load freq struct
     load([folderPowspec filename '.mat']);
+    
+    nrEpochs = size(freqStruct.powspctrm,1);
+    
+    % clean
+    [~, noisiness] = MarkNoisyData(patientnr, nightnr);
+    nrChans = size(noisiness,1);
+    thresholdBadChansPerEpochs = GetThresholdBadChansPerEpoch(patientnr, nightnr) * nrChans;
+    badepochs = [];
+    for e = 1:nrEpochs
+        if (sum(noisiness(:,e)) >= thresholdBadChansPerEpochs)
+            badepochs = [badepochs e];
+        end
+    end
+    freqStruct.powspctrm(badepochs,:,:) = [];
     freqStruct.powspctrm = mag2db(freqStruct.powspctrm);
     
     % find channel index
@@ -35,6 +49,7 @@ function PlotPowerSpectraAvgOverTime(patientnr, nightnr, channelStr)
         power = (squeeze(mean(freqStruct.powspctrm(:,channelnr,:),1)));
     end
     
+    figure;
     plot(freqStruct.freq, power, 'LineWidth', 3);
     xlabel('Frequency (Hz)','FontSize',20);
     ylabel('Power','FontSize',20);

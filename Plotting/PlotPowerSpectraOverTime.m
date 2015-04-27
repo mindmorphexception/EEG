@@ -55,14 +55,24 @@ function PlotPowerSpectraOverTime(patientnr, nightnr, channelStr)
     colormap([0 0 0; colormap]);
     xlabel('Time (hours)','FontSize',20);
     ylabel('Frequency (Hz)','FontSize',20);
-    title(['Power spectra for patient ' int2str(patientnr) ' (night ' int2str(nightnr) ') at ' channelStr]);
+    title(['P' int2str(patientnr) '\_' int2str(nightnr)]);
     colorbar
     set(gca,'FontSize',20)
     set(gca,'YDir','normal');
     if isempty(channelStr)
         channelStr = 'all chans mean';
     end
+    %[lim1 lim2] = caxis;
+    %set(gca,'XTick', lim1:3:lim2); 
+    
+    
+    myStyle = hgexport('factorystyle');
+    myStyle.Format = 'png';
+    myStyle.Resolution = 150;
+    myStyle.FontSizeMin = 30;
 
-    print(h, '-djpeg', '-r350', ['/imaging/sc03/Iulia/Overnight/figures-power-spectra/pow_p' num2str(patientnr) '_overnight' num2str(nightnr) '_' channelStr '.jpg']);
+    hgexport(gcf, ['/imaging/sc03/Iulia/Overnight/figures-power-spectra/pow_p' num2str(patientnr) '_overnight' num2str(nightnr) '_' channelStr '.png'], myStyle);
+
+    %print(h, '-djpeg', '-r350', ['/imaging/sc03/Iulia/Overnight/figures-power-spectra/pow_p' num2str(patientnr) '_overnight' num2str(nightnr) '_' channelStr '.jpg']);
     
 end
